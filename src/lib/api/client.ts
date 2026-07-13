@@ -16,7 +16,7 @@ import type {
 } from "./types";
 
 let _settings: ApiSettings = {
-    baseUrl: "http://localhost:8000/api/v1",
+    baseUrl: import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1",
     useMock: false,
 };
 
