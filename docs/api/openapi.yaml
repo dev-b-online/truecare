@@ -1,0 +1,671 @@
+openapi: 3.1.0
+info:
+  title: TruCare API
+  version: 1.0.0
+  description: |
+    REST API for TruCare digital treatment diary.
+    Called from the Lovable React SPA. Implemented in PHP + MySQL.
+    All PII is encrypted at rest (AES-256-GCM). Logs store masked values only.
+servers:
+  - url: https://api.trucare.example.com/v1
+    description: Production
+  - url: https://staging-api.trucare.example.com/v1
+    description: Staging
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Public
+  - name: Auth
+  - name: Patients
+  - name: Plans
+  - name: Doses
+  - name: Admin
+  - name: AdminSMS
+
+paths:
+  /health:
+    get:
+      tags: [Public]
+      security: []
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, version, time]
+                properties:
+                  ok: { type: boolean }
+                  version: { type: string }
+                  time: { type: string, format: date-time }
+
+  /auth/otp/request:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Request an OTP code by SMS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [channel, recipient]
+              properties:
+                channel: { type: string, enum: [sms] }
+                recipient: { type: string, pattern: '^05\d{8}$' }
+      responses:
+        '200':
+          description: Challenge created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OtpRequestResult' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /auth/otp/verify:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Verify an OTP code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challengeId, code]
+              properties:
+                challengeId: { type: string, minLength: 16 }
+                code: { type: string, pattern: '^\d{6}$' }
+      responses:
+        '200':
+          description: Verified
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OtpVerifyResult' }
+        '400': { $ref: '#/components/responses/OtpInvalid' }
+
+  /auth/otp/resend:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Resend an OTP challenge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challengeId, recipient]
+              properties:
+                challengeId: { type: string }
+                recipient: { type: string, pattern: '^05\d{8}$' }
+      responses:
+        '200':
+          description: New challenge
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OtpRequestResult' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /auth/admin/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                totp: { type: string, pattern: '^\d{6}$' }
+      responses:
+        '200':
+          description: Session
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sessionToken, adminId]
+                properties:
+                  sessionToken: { type: string }
+                  adminId: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoke the current session
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+
+  /patients:
+    post:
+      tags: [Patients]
+      security: []
+      summary: Register a patient (requires verified OTP challenge)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challengeId, firstName, channel, startDate, reminders]
+              properties:
+                challengeId: { type: string }
+                firstName: { type: string, minLength: 2, maxLength: 40 }
+                channel: { type: string, enum: [sms, email] }
+                phone: { type: string, pattern: '^05\d{8}$' }
+                email: { type: string, format: email, nullable: true }
+                startDate: { type: string, format: date }
+                reminders: { type: string, enum: [on, off] }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [patient, sessionToken]
+                properties:
+                  patient: { $ref: '#/components/schemas/Patient' }
+                  sessionToken: { type: string }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /patients/me:
+    get:
+      tags: [Patients]
+      summary: Current patient
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patient: { $ref: '#/components/schemas/Patient' }
+
+  /patients/me/consent:
+    post:
+      tags: [Patients]
+      summary: Store consent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [termsVersion, privacyPolicyVersion, disclaimerVersion, marketingOptIn]
+              properties:
+                termsVersion: { type: string }
+                privacyPolicyVersion: { type: string }
+                disclaimerVersion: { type: string }
+                marketingOptIn: { type: boolean }
+      responses:
+        '201':
+          description: Stored
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  consent: { $ref: '#/components/schemas/ConsentRecord' }
+
+  /plans/mine:
+    get:
+      tags: [Plans]
+      summary: Current patient's plan
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plan: { $ref: '#/components/schemas/TreatmentPlan' }
+
+  /plans/{planId}/doses:
+    get:
+      tags: [Doses]
+      summary: Dose events for a plan
+      parameters:
+        - in: path
+          name: planId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  doses:
+                    type: array
+                    items: { $ref: '#/components/schemas/DoseEvent' }
+
+  /doses/{id}:
+    patch:
+      tags: [Doses]
+      summary: Update a dose event
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [taken, missed, planned, not_required] }
+                notes: { type: string, maxLength: 500 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dose: { $ref: '#/components/schemas/DoseEvent' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /admin/stats:
+    get:
+      tags: [Admin]
+      summary: KPI stats
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminStats' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /admin/notifications:
+    get:
+      tags: [Admin]
+      summary: Masked notification log
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+        - in: query
+          name: cursor
+          schema: { type: string, nullable: true }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/NotificationLog' }
+                  nextCursor: { type: string, nullable: true }
+
+  /admin/incidents:
+    get:
+      tags: [Admin]
+      summary: Incident log
+      parameters:
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+        - in: query
+          name: cursor
+          schema: { type: string, nullable: true }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/IncidentLog' }
+                  nextCursor: { type: string, nullable: true }
+
+  /admin/sms/templates:
+    get:
+      tags: [AdminSMS]
+      summary: List SMS templates
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/SmsTemplate' }
+    post:
+      tags: [AdminSMS]
+      summary: Create SMS template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SmsTemplateInput' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  template: { $ref: '#/components/schemas/SmsTemplate' }
+
+  /admin/sms/templates/{id}:
+    patch:
+      tags: [AdminSMS]
+      summary: Update SMS template
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SmsTemplateInput' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  template: { $ref: '#/components/schemas/SmsTemplate' }
+    delete:
+      tags: [AdminSMS]
+      summary: Delete SMS template
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+
+  /admin/sms/health:
+    get:
+      tags: [AdminSMS]
+      summary: SMS provider status (masked)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SmsConfigView' }
+
+  /admin/sms/test:
+    post:
+      tags: [AdminSMS]
+      summary: Send a test SMS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [recipient]
+              properties:
+                recipient: { type: string, pattern: '^05\d{8}$' }
+                templateKey: { $ref: '#/components/schemas/SmsTemplateKey' }
+                message: { type: string, maxLength: 480 }
+      responses:
+        '200':
+          description: Sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  providerCode: { type: integer }
+        '502': { $ref: '#/components/responses/SmsProviderError' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Patient:
+      type: object
+      required: [id, firstName, channel, phoneMasked, startDate, reminders, language, createdAt]
+      properties:
+        id: { type: string }
+        firstName: { type: string }
+        channel: { type: string, enum: [sms, email] }
+        phoneMasked: { type: string }
+        emailMasked: { type: string, nullable: true }
+        startDate: { type: string, format: date }
+        reminders: { type: string, enum: [on, off] }
+        language: { type: string, enum: [he] }
+        createdAt: { type: string, format: date-time }
+
+    TreatmentPlan:
+      type: object
+      required: [id, patientId, startDate, cycleLengthDays, treatmentDays, breakDays, createdAt]
+      properties:
+        id: { type: string }
+        patientId: { type: string }
+        startDate: { type: string, format: date }
+        cycleLengthDays: { type: integer, enum: [7] }
+        treatmentDays: { type: integer }
+        breakDays: { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    DoseEvent:
+      type: object
+      required: [id, planId, date, slot, status, scheduledFor]
+      properties:
+        id: { type: string }
+        planId: { type: string }
+        date: { type: string, format: date }
+        slot: { type: string, enum: [morning, evening] }
+        status: { type: string, enum: [taken, planned, missed, not_required] }
+        scheduledFor: { type: string, format: date-time }
+        takenAt: { type: string, format: date-time, nullable: true }
+        notes: { type: string, nullable: true }
+
+    ConsentRecord:
+      type: object
+      properties:
+        id: { type: string }
+        patientId: { type: string }
+        termsVersion: { type: string }
+        privacyPolicyVersion: { type: string }
+        disclaimerVersion: { type: string }
+        marketingOptIn: { type: boolean }
+        acceptedAt: { type: string, format: date-time }
+        signatureHmac: { type: string }
+
+    NotificationLog:
+      type: object
+      properties:
+        id: { type: string }
+        channel: { type: string, enum: [sms, email] }
+        recipientMasked: { type: string }
+        template: { type: string }
+        status: { type: string, enum: [sent, failed] }
+        providerCode: { type: integer, nullable: true }
+        error: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    IncidentLog:
+      type: object
+      properties:
+        id: { type: string }
+        severity: { type: string, enum: [info, warning, error] }
+        code: { type: string }
+        message: { type: string }
+        createdAt: { type: string, format: date-time }
+        resolvedAt: { type: string, format: date-time, nullable: true }
+
+    AdminStats:
+      type: object
+      properties:
+        patientsTotal: { type: integer }
+        activePlans: { type: integer }
+        dosesTaken: { type: integer }
+        dosesMissed: { type: integer }
+        adherenceRate: { type: number, minimum: 0, maximum: 1 }
+        smsSent: { type: integer }
+        smsFailed: { type: integer }
+
+    SmsTemplateKey:
+      type: string
+      enum: [welcome, morning_reminder, evening_reminder, missed_dose, otp_code, custom]
+
+    SmsTemplate:
+      type: object
+      properties:
+        id: { type: string }
+        key: { $ref: '#/components/schemas/SmsTemplateKey' }
+        name: { type: string }
+        body: { type: string, maxLength: 480 }
+        enabled: { type: boolean }
+        updatedAt: { type: string, format: date-time }
+        updatedBy: { type: string, nullable: true }
+
+    SmsTemplateInput:
+      type: object
+      required: [key, name, body, enabled]
+      properties:
+        key: { $ref: '#/components/schemas/SmsTemplateKey' }
+        name: { type: string, maxLength: 120 }
+        body: { type: string, maxLength: 480 }
+        enabled: { type: boolean }
+
+    SmsConfigView:
+      type: object
+      properties:
+        sender: { type: string }
+        providerConfigured: { type: boolean }
+        keyMasked: { type: string }
+        userMasked: { type: string }
+        passMasked: { type: string }
+        source: { type: string, enum: [env, db] }
+
+    OtpRequestResult:
+      type: object
+      required: [challengeId, expiresAt, resendAvailableIn]
+      properties:
+        challengeId: { type: string }
+        expiresAt: { type: string, format: date-time }
+        resendAvailableIn: { type: integer, description: seconds }
+
+    OtpVerifyResult:
+      type: object
+      required: [sessionToken]
+      properties:
+        sessionToken: { type: string }
+        patientId: { type: string, nullable: true }
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: { type: object, additionalProperties: true }
+
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Missing or invalid token
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Insufficient role
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: Conflict / duplicate
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    OtpInvalid:
+      description: OTP invalid / expired / consumed
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    SmsProviderError:
+      description: sms4free returned an error code
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }

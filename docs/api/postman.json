@@ -1,0 +1,224 @@
+{
+  "info": {
+    "name": "TruCare API",
+    "_postman_id": "trucare-api-collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "TruCare REST API — PHP backend. See docs/api/openapi.yaml for full contract."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://api.trucare.example.com/v1" },
+    { "key": "patientToken", "value": "" },
+    { "key": "adminToken", "value": "" },
+    { "key": "challengeId", "value": "" },
+    { "key": "planId", "value": "" },
+    { "key": "doseId", "value": "" },
+    { "key": "templateId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": { "method": "GET", "url": "{{baseUrl}}/health" }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /auth/otp/request",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/otp/request",
+            "body": { "mode": "raw", "raw": "{\n  \"channel\": \"sms\",\n  \"recipient\": \"0501234567\"\n}" }
+          }
+        },
+        {
+          "name": "POST /auth/otp/verify",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/otp/verify",
+            "body": { "mode": "raw", "raw": "{\n  \"challengeId\": \"{{challengeId}}\",\n  \"code\": \"123456\"\n}" }
+          }
+        },
+        {
+          "name": "POST /auth/admin/login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/admin/login",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@trucare.local\",\n  \"password\": \"ChangeMe!2026\"\n}" }
+          }
+        },
+        {
+          "name": "POST /auth/logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{patientToken}}" }],
+            "url": "{{baseUrl}}/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Patients",
+      "item": [
+        {
+          "name": "POST /patients",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/patients",
+            "body": { "mode": "raw", "raw": "{\n  \"challengeId\": \"{{challengeId}}\",\n  \"firstName\": \"יעל\",\n  \"channel\": \"sms\",\n  \"phone\": \"0501234567\",\n  \"startDate\": \"2026-07-05\",\n  \"reminders\": \"on\"\n}" }
+          }
+        },
+        {
+          "name": "GET /patients/me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{patientToken}}" }],
+            "url": "{{baseUrl}}/patients/me"
+          }
+        },
+        {
+          "name": "POST /patients/me/consent",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{patientToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/patients/me/consent",
+            "body": { "mode": "raw", "raw": "{\n  \"termsVersion\": \"2026-01\",\n  \"privacyPolicyVersion\": \"2026-01\",\n  \"disclaimerVersion\": \"2026-01\",\n  \"marketingOptIn\": false\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Plans & Doses",
+      "item": [
+        {
+          "name": "GET /plans/mine",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{patientToken}}" }],
+            "url": "{{baseUrl}}/plans/mine"
+          }
+        },
+        {
+          "name": "GET /plans/:planId/doses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{patientToken}}" }],
+            "url": "{{baseUrl}}/plans/{{planId}}/doses?from=2026-07-01&to=2026-07-31"
+          }
+        },
+        {
+          "name": "PATCH /doses/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{patientToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/doses/{{doseId}}",
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"taken\",\n  \"notes\": \"לפני ארוחת בוקר\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "GET /admin/stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/admin/stats"
+          }
+        },
+        {
+          "name": "GET /admin/notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/admin/notifications?limit=50"
+          }
+        },
+        {
+          "name": "GET /admin/incidents",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/admin/incidents?limit=50"
+          }
+        },
+        {
+          "name": "GET /admin/sms/templates",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/admin/sms/templates"
+          }
+        },
+        {
+          "name": "POST /admin/sms/templates",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/admin/sms/templates",
+            "body": { "mode": "raw", "raw": "{\n  \"key\": \"custom\",\n  \"name\": \"מבצע קיץ\",\n  \"body\": \"שלום {{firstName}}\",\n  \"enabled\": true\n}" }
+          }
+        },
+        {
+          "name": "PATCH /admin/sms/templates/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/admin/sms/templates/{{templateId}}",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"תזכורת בוקר\",\n  \"body\": \"בוקר טוב {{firstName}}\",\n  \"enabled\": true\n}" }
+          }
+        },
+        {
+          "name": "DELETE /admin/sms/templates/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/admin/sms/templates/{{templateId}}"
+          }
+        },
+        {
+          "name": "GET /admin/sms/health",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/admin/sms/health"
+          }
+        },
+        {
+          "name": "POST /admin/sms/test",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/admin/sms/test",
+            "body": { "mode": "raw", "raw": "{\n  \"recipient\": \"0501234567\",\n  \"templateKey\": \"morning_reminder\"\n}" }
+          }
+        }
+      ]
+    }
+  ]
+}
