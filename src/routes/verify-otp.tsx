@@ -21,6 +21,22 @@ function VerifyOtpRoute() {
   const [submitting, setSubmitting] = useState(false);
   const [challengeId, setChallengeId] = useState<string | undefined>(s.challengeId);
   const otpRequested = useRef(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startCountdown = (seconds: number) => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setCountdown(seconds);
+    intervalRef.current = setInterval(() => {
+      setCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(intervalRef.current!);
+          intervalRef.current = null;
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
+  };
 
   useEffect(() => {
     if (!s.phone) {
@@ -40,14 +56,12 @@ function VerifyOtpRoute() {
           toast.error(err.message);
         });
     }
+    startCountdown(60);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (countdown <= 0) return;
-    const t = setInterval(() => setCountdown((c) => c - 1), 1000);
-    return () => clearInterval(t);
-  }, [countdown]);
 
   const doVerify = async () => {
     if (!challengeId || code.length !== 6) return;
@@ -72,7 +86,7 @@ function VerifyOtpRoute() {
       const r = await api.resendOtp(s.phone);
       setChallengeId(r.challengeId);
       s.set({ challengeId: r.challengeId });
-      setCountdown(60);
+      startCountdown(60);
       toast.success("נשלח קוד חדש");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שליחה נכשלה");
