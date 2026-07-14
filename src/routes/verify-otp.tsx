@@ -70,6 +70,11 @@ function VerifyOtpRoute() {
       const r = await api.verifyOtp(challengeId, code);
       if (r.sessionToken) {
         localStorage.setItem("trucare.session", r.sessionToken);
+      } else {
+        // New (unregistered) user: OTP verify returns no patient session.
+        // Drop any stale patient token so /consent uses the real one
+        // minted by registerPatient, not a leftover anonymous session.
+        localStorage.removeItem("trucare.session");
       }
       toast.success("אומת בהצלחה");
       nav({ to: "/consent" });
