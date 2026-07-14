@@ -3,7 +3,7 @@ import { PageShell } from "@/components/PageShell";
 import { OtpInput } from "@/components/OtpInput";
 import { Button } from "@/components/ui/button";
 import { useOnboarding } from "@/state/onboardingStore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { maskPhone } from "@/lib/mask";
 import { toast } from "sonner";
@@ -20,20 +20,25 @@ function VerifyOtpRoute() {
   const [countdown, setCountdown] = useState(60);
   const [submitting, setSubmitting] = useState(false);
   const [challengeId, setChallengeId] = useState<string | undefined>(s.challengeId);
+  const otpRequested = useRef(false);
 
   useEffect(() => {
     if (!s.phone) {
       nav({ to: "/register" });
       return;
     }
-    if (!challengeId) {
+    if (!challengeId && !otpRequested.current) {
+      otpRequested.current = true;
       api.requestOtp(s.phone)
         .then((r) => {
           setChallengeId(r.challengeId);
           s.set({ challengeId: r.challengeId });
           toast.success("נשלח קוד אימות");
         })
-        .catch((err: Error) => toast.error(err.message));
+        .catch((err: Error) => {
+          otpRequested.current = false;
+          toast.error(err.message);
+        });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

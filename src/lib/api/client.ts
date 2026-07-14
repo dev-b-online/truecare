@@ -94,8 +94,8 @@ export const realApi = {
     async registerPatient(input: {
         firstName: string;
         channel: "sms" | "email";
-        phoneMasked: string;
-        emailMasked?: string;
+        phone: string;
+        email?: string;
         startDate: string;
         reminders: "on" | "off";
     }): Promise<Patient> {
@@ -104,8 +104,8 @@ export const realApi = {
             body: JSON.stringify({
                 firstName: input.firstName,
                 channel: input.channel,
-                phone: input.phoneMasked,
-                email: input.emailMasked,
+                phone: input.phone,
+                email: input.email,
                 startDate: input.startDate,
                 reminders: input.reminders,
             }),

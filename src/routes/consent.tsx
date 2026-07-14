@@ -5,7 +5,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { useOnboarding } from "@/state/onboardingStore";
 import { api } from "@/lib/api";
-import { maskPhone, maskEmail } from "@/lib/mask";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/consent")({
@@ -47,8 +46,8 @@ function ConsentRoute() {
       const patient = await api.registerPatient({
         firstName: s.firstName,
         channel: s.channel,
-        phoneMasked: s.channel === "sms" ? maskPhone(s.phone) : "",
-        emailMasked: s.channel === "email" ? maskEmail(s.email) : undefined,
+        phone: s.phone,
+        email: s.email,
         startDate: s.startDate,
         reminders: s.reminders,
       });
