@@ -45,6 +45,9 @@ function VerifyOtpRoute() {
     }
     if (!challengeId && !otpRequested.current) {
       otpRequested.current = true;
+      // Starting verification means we begin a fresh patient session, so drop
+      // any leftover token from a previous (possibly anonymous) session.
+      localStorage.removeItem("trucare.session");
       api.requestOtp(s.phone)
         .then((r) => {
           setChallengeId(r.challengeId);
@@ -88,6 +91,9 @@ function VerifyOtpRoute() {
   const doResend = async () => {
     if (countdown > 0) return;
     try {
+      // Resending also means we restart the verification flow — clear any
+      // stale session token so the next verified token is the only one used.
+      localStorage.removeItem("trucare.session");
       const r = await api.resendOtp(s.phone);
       setChallengeId(r.challengeId);
       s.set({ challengeId: r.challengeId });

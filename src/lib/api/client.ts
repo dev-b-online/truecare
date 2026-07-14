@@ -99,6 +99,11 @@ export const realApi = {
         startDate: string;
         reminders: "on" | "off";
     }): Promise<Patient> {
+        // Drop any stale patient token (e.g. a leftover anonymous OTP token
+        // from a previous test) so the freshly issued token below is the
+        // only one presented to subsequent calls like /patients/me/consent.
+        localStorage.removeItem(PATIENT_TOKEN_KEY);
+
         const result = await req<{ sessionToken: string; token?: string; patient: Patient }>("/patients", {
             method: "POST",
             body: JSON.stringify({
