@@ -6,8 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useServerFn } from "@tanstack/react-start";
-import { sendSms } from "@/lib/sms/sms4free.functions";
 import { IL_PHONE_REGEX } from "@/lib/validation";
 
 export const Route = createFileRoute("/admin/sms-settings")({
@@ -18,7 +16,6 @@ export const Route = createFileRoute("/admin/sms-settings")({
 function SmsSettingsRoute() {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["admin", "sms-config"], queryFn: api.getSmsConfigView });
-  const sendFn = useServerFn(sendSms);
 
   const [key, setKey] = useState("");
   const [user, setUser] = useState("");
@@ -48,9 +45,8 @@ function SmsSettingsRoute() {
     }
     setBusy(true);
     try {
-      const res = await sendFn({ data: { recipient: testTo, message: "TruCare – בדיקה" } });
-      if (res.ok) toast.success(`נשלח (קוד ${res.providerCode})`);
-      else toast.error(`נכשל (${res.providerCode}): ${res.error ?? ""}`);
+      const res = await api.sendSmsTest(testTo);
+      toast.success(`נשלח (קוד ${res.providerCode})`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "כשל בבדיקה");
     } finally {

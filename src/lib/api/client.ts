@@ -187,6 +187,34 @@ export const realApi = {
         return req(`/admin/sms/templates/${id}`, { method: "DELETE" });
     },
 
+    // ── SMS test send ────────────────────────────────────────────
+    async sendSmsTest(recipient: string): Promise<{ ok: boolean; providerCode: number }> {
+        return req("/admin/sms/test", {
+            method: "POST",
+            body: JSON.stringify({ recipient }),
+        });
+    },
+
+    // ── OTP auth ─────────────────────────────────────────────────
+    async requestOtp(phone: string): Promise<{ challengeId: string; expiresAt: string; resendAvailableIn: number; _devCode?: string }> {
+        return req("/auth/otp/request", {
+            method: "POST",
+            body: JSON.stringify({ recipient: phone }),
+        });
+    },
+    async verifyOtp(challengeId: string, code: string): Promise<{ sessionToken: string; patientId: string | null }> {
+        return req("/auth/otp/verify", {
+            method: "POST",
+            body: JSON.stringify({ challengeId, code }),
+        });
+    },
+    async resendOtp(phone: string): Promise<{ challengeId: string; expiresAt: string; resendAvailableIn: number }> {
+        return req("/auth/otp/resend", {
+            method: "POST",
+            body: JSON.stringify({ recipient: phone }),
+        });
+    },
+
     // ── Helpers (no-op stubs, server handles these) ──────────────
     addNotification() {},
     addIncident() {},
