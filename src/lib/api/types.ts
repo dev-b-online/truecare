@@ -29,6 +29,11 @@ export interface TreatmentPlan {
   createdAt: string;
 }
 
+// The /patients/me/plan endpoint wraps the plan in { plan: TreatmentPlan }.
+export interface PlanResponse {
+  plan: TreatmentPlan;
+}
+
 export interface DoseEvent {
   id: string;
   planId: string;

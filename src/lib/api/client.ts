@@ -9,6 +9,7 @@ import type {
     IncidentLog,
     NotificationLog,
     Patient,
+    PlanResponse,
     SmsConfigView,
     SmsTemplate,
     SmsTemplateKey,
@@ -77,11 +78,18 @@ export const realApi = {
     },
 
     // ── Treatment plan & doses ───────────────────────────────────
-    async getPlanForPatient(patientId: string): Promise<TreatmentPlan | undefined> {
+    async getPlanForPatient(patientId: string): Promise<PlanResponse | undefined> {
         return req(`/patients/${patientId}/plan`);
     },
     async listDoses(planId: string): Promise<DoseEvent[]> {
-        return req(`/plans/${planId}/doses`);
+        const res = await req<{ doses: DoseEvent[] }>(`/plans/${planId}/doses`);
+        return res.doses ?? [];
+    },
+    async resetCycle(startDate: string): Promise<PlanResponse> {
+        return req(`/plans/reset`, {
+            method: "POST",
+            body: JSON.stringify({ startDate }),
+        });
     },
     async markDose(id: string, status: "taken" | "missed"): Promise<DoseEvent | undefined> {
         return req(`/doses/${id}`, {
@@ -217,6 +225,17 @@ export const realApi = {
         return req("/auth/otp/resend", {
             method: "POST",
             body: JSON.stringify({ recipient: phone }),
+        });
+    },
+
+    // ── Cookie consent (long-term DB mirror) ────────────────
+    async saveCookieConsent(input: {
+        status: "granted" | "denied";
+        version?: number;
+    }): Promise<{ ok: boolean; status: string }> {
+        return req(`/patients/me/cookie-consent`, {
+            method: "POST",
+            body: JSON.stringify({ status: input.status, version: input.version }),
         });
     },
 

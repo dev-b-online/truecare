@@ -2,13 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { buildTwoWeekGrid } from "@/lib/calendar";
+import { buildTwoWeekGrid, startOfWeek } from "@/lib/calendar";
 import { parseISO, addDays, format, startOfMonth } from "date-fns";
 import { useDiary } from "@/state/diaryStore";
 import { DayCard } from "@/components/diary/DayCard";
+import { ResetCycleModal } from "@/components/ResetCycleModal";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { HEBREW_MONTHS } from "@/lib/calendar";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/diary")({
   component: DiaryRoute,
@@ -18,17 +21,20 @@ export const Route = createFileRoute("/diary")({
 function DiaryRoute() {
   const { planId, anchorDate, setAnchor } = useDiary();
   const qc = useQueryClient();
+  const [resetOpen, setResetOpen] = useState(false);
+  // API returns { plan: {...} } — unwrap .plan.
   const planQuery = useQuery({
     queryKey: ["plan"],
     queryFn: () => api.getPlanForPatient("me"),
   });
+  const plan = planQuery.data?.plan;
   const dosesQuery = useQuery({
-    queryKey: ["doses", planQuery.data?.id],
-    enabled: !!planQuery.data?.id,
-    queryFn: () => api.listDoses(planQuery.data!.id),
+    queryKey: ["doses", plan?.id],
+    enabled: !!plan?.id,
+    queryFn: () => api.listDoses(plan!.id),
   });
 
-  const startDate = planQuery.data?.startDate ?? anchorDate;
+  const startDate = plan?.startDate ?? anchorDate;
   const anchor = parseISO(anchorDate);
   const cells = buildTwoWeekGrid(startDate, anchor, dosesQuery.data ?? []);
   const week1 = cells.slice(0, 7);
@@ -43,20 +49,34 @@ function DiaryRoute() {
     qc.invalidateQueries({ queryKey: ["admin", "stats"] });
   };
 
+  const onReset = async (newStartDate: string) => {
+    try {
+      await api.resetCycle(newStartDate);
+      qc.invalidateQueries({ queryKey: ["plan"] });
+      qc.invalidateQueries({ queryKey: ["doses", plan?.id] });
+      setAnchor(format(startOfWeek(parseISO(newStartDate)), "yyyy-MM-dd"));
+      toast.success("המחזור התחיל");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "שגיאה באיפוס");
+    } finally {
+      setResetOpen(false);
+    }
+  };
+
   return (
     <PageShell wide>
       <div className="mx-auto flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => shift(-14)} className="rounded-full">
             <ChevronRight className="h-4 w-4" />
-            שבועיים אחורה
+            שבועות אחורה
           </Button>
           <div className="text-center">
             <h1 className="text-lg font-bold text-foreground">היומן שלי</h1>
             <p className="text-xs text-muted-foreground">{monthLabel}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => shift(14)} className="rounded-full">
-            שבועיים קדימה
+            שבועות קדימה
             <ChevronLeft className="h-4 w-4" />
           </Button>
         </div>
@@ -77,14 +97,30 @@ function DiaryRoute() {
         <WeekGrid title="שבוע 1" cells={week1} onMark={mark} startDate={startDate} />
         <WeekGrid title="שבוע 2" cells={week2} onMark={mark} startDate={startDate} />
 
-        <Button
-          variant="outline"
-          className="mt-2 rounded-full self-center"
-          onClick={() => setAnchor(format(startOfMonth(new Date()), "yyyy-MM-dd"))}
-        >
-          חזרה להיום
-        </Button>
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            className="mt-2 rounded-full"
+            onClick={() => setAnchor(format(startOfWeek(new Date()), "yyyy-MM-dd"))}
+          >
+            חזרה להיום
+          </Button>
+          <Button
+            variant="ghost"
+            className="mt-2 rounded-full text-muted-foreground"
+            onClick={() => setResetOpen(true)}
+          >
+            איפוס מחזור טיפול
+          </Button>
+        </div>
       </div>
+
+      <ResetCycleModal
+        open={resetOpen}
+        onOpenChange={setResetOpen}
+        defaultStartDate={plan?.startDate}
+        onConfirm={onReset}
+      />
     </PageShell>
   );
 }

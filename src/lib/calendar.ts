@@ -16,6 +16,8 @@ export interface DayCell {
   dayIndexInCycle: number;
   weekIndex: number; // 0 or 1 for a 2-week view
   label: string; // e.g. "יום 1"
+  isToday: boolean;
+  isBeforeStart: boolean; // date is before the plan's startDate
   doses: {
     morning?: DoseEvent;
     evening?: DoseEvent;
@@ -25,11 +27,23 @@ export interface DayCell {
 export function computeCycleDay(startDateIso: string, target: Date): number {
   const start = startOfDay(parseISO(startDateIso));
   const diff = differenceInCalendarDays(startOfDay(target), start);
-  return ((diff % 7) + 7) % 7 + 1; // 1..7
+  return ((diff % 7) + 7) % 7 + 1; // 1..7 (negative-safe)
 }
 
 export function isTreatmentDay(cycleDay: number): boolean {
   return cycleDay >= 1 && cycleDay <= 4;
+}
+
+// Sunday-based week alignment: the first visible cell is the Sunday
+// on or before `anchor` (the conventional calendar week start).
+export function startOfWeek(anchor: Date): Date {
+  const d = startOfDay(anchor);
+  // JS getDay(): 0=Sun..6=Sat → go back (day) days to reach Sunday.
+  return addDays(d, -d.getDay());
+}
+
+export function isBeforeStart(startDateIso: string, target: Date): boolean {
+  return startOfDay(target) < startOfDay(parseISO(startDateIso));
 }
 
 export function buildTwoWeekGrid(
@@ -38,21 +52,26 @@ export function buildTwoWeekGrid(
   doses: DoseEvent[],
 ): DayCell[] {
   const cells: DayCell[] = [];
-  const first = startOfDay(anchor);
+  const first = startOfWeek(anchor);
+  const todayIso = format(startOfDay(new Date()), "yyyy-MM-dd");
   for (let i = 0; i < 14; i += 1) {
     const date = addDays(first, i);
     const iso = format(date, "yyyy-MM-dd");
     const cycleDay = computeCycleDay(startDateIso, date);
+    const beforeStart = isBeforeStart(startDateIso, date);
     const dayDoses = doses.filter((d) => d.date === iso);
+    const treatment = isTreatmentDay(cycleDay) && !beforeStart;
     cells.push({
       date,
       iso,
       cycleDay,
-      isTreatmentDay: isTreatmentDay(cycleDay),
-      isBreakStart: cycleDay === 5,
+      isTreatmentDay: treatment,
+      isBreakStart: cycleDay === 5 && !beforeStart,
       dayIndexInCycle: cycleDay,
       weekIndex: Math.floor(i / 7),
       label: `יום ${cycleDay}`,
+      isToday: iso === todayIso,
+      isBeforeStart: beforeStart,
       doses: {
         morning: dayDoses.find((d) => d.slot === "morning"),
         evening: dayDoses.find((d) => d.slot === "evening"),

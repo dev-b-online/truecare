@@ -12,6 +12,10 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
+import { useConsent } from "@/state/consentStore";
+import { enableAnalytics, trackPageView } from "@/lib/analytics";
+import { useRouterState } from "@tanstack/react-router";
 
 function NotFoundComponent() {
   return (
@@ -127,11 +131,24 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const status = useConsent((s) => s.status);
+  const location = useRouterState({ select: (s) => s.location });
+
+  // Returning visitors who already granted consent: enable GA on load.
+  useEffect(() => {
+    if (status === "granted") enableAnalytics();
+  }, [status]);
+
+  // SPA page_view tracking on every client-side navigation.
+  useEffect(() => {
+    if (location?.pathname) trackPageView(location.pathname);
+  }, [location?.pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
       <Toaster position="top-center" richColors closeButton />
+      <CookieConsentBanner />
     </QueryClientProvider>
   );
 }
