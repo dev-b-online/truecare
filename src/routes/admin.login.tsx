@@ -36,7 +36,10 @@ function AdminLoginRoute() {
 
     setBusy(true);
     try {
-      const baseUrl = localStorage.getItem("trucare.api.baseUrl") ?? import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1";
+      const baseUrl =
+        localStorage.getItem("trucare.api.baseUrl") ??
+        import.meta.env.VITE_API_URL ??
+        "http://localhost:8000/api/v1";
 
       const res = await fetch(`${baseUrl}/auth/admin/login`, {
         method: "POST",

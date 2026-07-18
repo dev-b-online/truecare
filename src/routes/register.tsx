@@ -7,6 +7,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useOnboarding } from "@/state/onboardingStore";
 import { registerSchema } from "@/lib/validation";
 import { useState } from "react";
+import { api } from "@/lib/api";
+import { ExistingPatientDialog } from "@/components/ExistingPatientDialog";
 
 export const Route = createFileRoute("/register")({
   component: RegisterRoute,
@@ -17,8 +19,9 @@ function RegisterRoute() {
   const nav = useNavigate();
   const s = useOnboarding();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [existingDialogOpen, setExistingDialogOpen] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = registerSchema.safeParse({
       firstName: s.firstName,
@@ -37,6 +40,19 @@ function RegisterRoute() {
       return;
     }
     setErrors({});
+
+    if (s.channel === "sms" && s.phone) {
+      try {
+        const r = await api.checkPhone(s.phone);
+        if (r.exists) {
+          setExistingDialogOpen(true);
+          return;
+        }
+      } catch {
+        // Fall through to normal registration flow if the check fails
+      }
+    }
+
     if (s.channel === "sms") {
       nav({ to: "/verify-otp" });
     } else {
@@ -148,6 +164,11 @@ function RegisterRoute() {
             : "נעבור להסכמות. אימות אימייל יתווסף בהמשך."}
         </p>
       </form>
+      <ExistingPatientDialog
+        open={existingDialogOpen}
+        onOpenChange={setExistingDialogOpen}
+        phone={s.phone}
+      />
     </PageShell>
   );
 }

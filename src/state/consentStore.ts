@@ -4,6 +4,7 @@
 // visitors are not re-prompted. A DB sync hook is provided for
 // long-term / cross-device persistence (see lib/api client).
 import { create } from "zustand";
+import { api } from "@/lib/api";
 
 export type ConsentStatus = "granted" | "denied" | null;
 
@@ -49,6 +50,7 @@ interface ConsentState {
   status: ConsentStatus;
   set: (status: Exclude<ConsentStatus, null>) => void;
   reset: () => void;
+  hydrateFromServer: () => Promise<void>;
 }
 
 export const useConsent = create<ConsentState>((set) => ({
@@ -60,5 +62,16 @@ export const useConsent = create<ConsentState>((set) => ({
   reset: () => {
     localStorage.removeItem(STORAGE_KEY);
     set({ status: null });
+  },
+  hydrateFromServer: async () => {
+    try {
+      const r = await api.getCookieConsent();
+      if (r.status === "granted" || r.status === "denied") {
+        persist(r.status);
+        set({ status: r.status });
+      }
+    } catch {
+      // Not authenticated or network error — keep local status (null → banner shows).
+    }
   },
 }));

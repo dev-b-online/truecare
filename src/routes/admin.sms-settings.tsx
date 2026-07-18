@@ -63,13 +63,21 @@ function SmsSettingsRoute() {
           <dt className="text-muted-foreground">מקור:</dt>
           <dd className="font-mono text-xs">{q.data?.source ?? "—"}</dd>
           <dt className="text-muted-foreground">Key:</dt>
-          <dd className="font-mono text-xs" dir="ltr">{q.data?.keyMasked ?? "—"}</dd>
+          <dd className="font-mono text-xs" dir="ltr">
+            {q.data?.keyMasked ?? "—"}
+          </dd>
           <dt className="text-muted-foreground">User:</dt>
-          <dd className="font-mono text-xs" dir="ltr">{q.data?.userMasked ?? "—"}</dd>
+          <dd className="font-mono text-xs" dir="ltr">
+            {q.data?.userMasked ?? "—"}
+          </dd>
           <dt className="text-muted-foreground">Pass:</dt>
-          <dd className="font-mono text-xs" dir="ltr">{q.data?.passMasked ?? "—"}</dd>
+          <dd className="font-mono text-xs" dir="ltr">
+            {q.data?.passMasked ?? "—"}
+          </dd>
           <dt className="text-muted-foreground">Sender:</dt>
-          <dd className="font-mono text-xs" dir="ltr">{q.data?.sender ?? "—"}</dd>
+          <dd className="font-mono text-xs" dir="ltr">
+            {q.data?.sender ?? "—"}
+          </dd>
         </dl>
       </div>
 
@@ -77,28 +85,65 @@ function SmsSettingsRoute() {
         <h2 className="text-sm font-semibold">דריסת הגדרות (נשמר בבקנד בלבד)</h2>
         <div className="flex flex-col gap-1">
           <Label htmlFor="key">Key</Label>
-          <Input id="key" dir="ltr" value={key} onChange={(e) => setKey(e.target.value)} className="h-11 rounded-xl bg-background text-right" placeholder="השאר ריק כדי לשמור את הקיים" />
+          <Input
+            id="key"
+            dir="ltr"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+            className="h-11 rounded-xl bg-background text-right"
+            placeholder="השאר ריק כדי לשמור את הקיים"
+          />
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor="user">User</Label>
-          <Input id="user" dir="ltr" value={user} onChange={(e) => setUser(e.target.value)} className="h-11 rounded-xl bg-background text-right" />
+          <Input
+            id="user"
+            dir="ltr"
+            value={user}
+            onChange={(e) => setUser(e.target.value)}
+            className="h-11 rounded-xl bg-background text-right"
+          />
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor="pass">Password</Label>
-          <Input id="pass" dir="ltr" type="password" value={pass} onChange={(e) => setPass(e.target.value)} className="h-11 rounded-xl bg-background text-right" />
+          <Input
+            id="pass"
+            dir="ltr"
+            type="password"
+            value={pass}
+            onChange={(e) => setPass(e.target.value)}
+            className="h-11 rounded-xl bg-background text-right"
+          />
         </div>
         <div className="flex flex-col gap-1">
           <Label htmlFor="sender">Sender</Label>
-          <Input id="sender" dir="ltr" value={sender} onChange={(e) => setSender(e.target.value)} className="h-11 rounded-xl bg-background text-right" placeholder="TruCare" />
+          <Input
+            id="sender"
+            dir="ltr"
+            value={sender}
+            onChange={(e) => setSender(e.target.value)}
+            className="h-11 rounded-xl bg-background text-right"
+            placeholder="TruCare"
+          />
         </div>
-        <Button onClick={save} className="rounded-full">שמור</Button>
+        <Button onClick={save} className="rounded-full">
+          שמור
+        </Button>
       </div>
 
       <div className="card-tint flex flex-col gap-3 rounded-2xl p-5">
         <h2 className="text-sm font-semibold">בדיקת שליחה</h2>
         <div className="flex flex-col gap-1">
           <Label htmlFor="testTo">נמען לבדיקה</Label>
-          <Input id="testTo" dir="ltr" inputMode="numeric" value={testTo} onChange={(e) => setTestTo(e.target.value.replace(/\D/g, "").slice(0, 10))} className="h-11 rounded-xl bg-background text-right" placeholder="0501234567" />
+          <Input
+            id="testTo"
+            dir="ltr"
+            inputMode="numeric"
+            value={testTo}
+            onChange={(e) => setTestTo(e.target.value.replace(/\D/g, "").slice(0, 10))}
+            className="h-11 rounded-xl bg-background text-right"
+            placeholder="0501234567"
+          />
         </div>
         <Button onClick={runTest} disabled={busy} variant="secondary" className="rounded-full">
           {busy ? "שולח..." : "שלח בדיקה"}

@@ -28,8 +28,8 @@ function WelcomeRoute() {
       <div className="mt-4 flex flex-col items-center gap-6 text-center">
         <h1 className="text-3xl font-extrabold text-foreground">ברוכים הבאים ל-TruCare</h1>
         <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
-          יומן דיגיטלי אישי למעקב אחר מנות הבוקר והערב, קבלת תזכורות ב-SMS ודיווח על תופעות.
-          התכנון מבוסס על הפרוטוקול של Truqap – ארבעה ימי טיפול ושלושה ימי הפסקה.
+          יומן דיגיטלי אישי למעקב אחר מנות הבוקר והערב, קבלת תזכורות ב-SMS ודיווח על תופעות. התכנון
+          מבוסס על הפרוטוקול של Truqap – ארבעה ימי טיפול ושלושה ימי הפסקה.
         </p>
         <div className="card-tint w-full max-w-md rounded-2xl p-5 text-right">
           <h2 className="text-lg font-semibold">מה חדש כאן?</h2>

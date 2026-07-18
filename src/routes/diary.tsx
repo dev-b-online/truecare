@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -10,18 +10,38 @@ import { ResetCycleModal } from "@/components/ResetCycleModal";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { HEBREW_MONTHS } from "@/lib/calendar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+
+const PATIENT_TOKEN_KEY = "trucare.session";
 
 export const Route = createFileRoute("/diary")({
   component: DiaryRoute,
   head: () => ({ meta: [{ title: "היומן שלי | TruCare" }] }),
+  beforeLoad: () => {
+    if (typeof window !== "undefined" && !localStorage.getItem(PATIENT_TOKEN_KEY)) {
+      throw redirect({ to: "/" });
+    }
+  },
 });
 
 function DiaryRoute() {
   const { planId, anchorDate, setAnchor } = useDiary();
   const qc = useQueryClient();
+  const nav = useNavigate();
   const [resetOpen, setResetOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.status === 401) {
+        localStorage.removeItem(PATIENT_TOKEN_KEY);
+        nav({ to: "/" });
+      }
+    };
+    window.addEventListener("trucare:api:unauthorized", handler);
+    return () => window.removeEventListener("trucare:api:unauthorized", handler);
+  }, [nav]);
   // API returns { plan: {...} } — unwrap .plan.
   const planQuery = useQuery({
     queryKey: ["plan"],

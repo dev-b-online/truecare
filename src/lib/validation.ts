@@ -9,11 +9,7 @@ export const phoneSchema = z
 
 export const emailSchema = z.string().trim().email("כתובת אימייל לא תקינה").max(255);
 
-export const nameSchema = z
-  .string()
-  .trim()
-  .min(2, "שם חייב לפחות 2 תווים")
-  .max(40, "שם ארוך מדי");
+export const nameSchema = z.string().trim().min(2, "שם חייב לפחות 2 תווים").max(40, "שם ארוך מדי");
 
 export const registerSchema = z
   .object({

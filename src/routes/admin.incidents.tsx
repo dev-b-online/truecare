@@ -38,9 +38,7 @@ function IncidentsRoute() {
               <span className="text-sm font-medium text-foreground">{i.message}</span>
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">
-              {i.resolvedAt
-                ? `נסגר ${format(parseISO(i.resolvedAt), "dd/MM HH:mm")}`
-                : "פתוח"}
+              {i.resolvedAt ? `נסגר ${format(parseISO(i.resolvedAt), "dd/MM HH:mm")}` : "פתוח"}
             </div>
           </div>
         ))}

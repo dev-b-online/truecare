@@ -6,7 +6,9 @@
 ## Public
 
 ### `GET /health`
+
 בדיקת חיבור. אין auth.
+
 ```json
 200 → { "ok": true, "version": "1.0.0", "time": "2026-07-05T10:00:00Z" }
 ```
@@ -16,6 +18,7 @@
 ## Auth
 
 ### `POST /auth/otp/request`
+
 ```json
 Request:  { "channel": "sms", "recipient": "0501234567" }
 200:      { "challengeId": "8f2a...c1", "expiresAt": "2026-07-05T10:05:00Z", "resendAvailableIn": 60 }
@@ -23,6 +26,7 @@ Request:  { "channel": "sms", "recipient": "0501234567" }
 ```
 
 ### `POST /auth/otp/verify`
+
 ```json
 Request:  { "challengeId": "8f2a...c1", "code": "482913" }
 200:      { "sessionToken": "eyJhbGci...", "patientId": "01J8P..." }
@@ -30,12 +34,14 @@ Request:  { "challengeId": "8f2a...c1", "code": "482913" }
 ```
 
 ### `POST /auth/otp/resend`
+
 ```json
 Request:  { "challengeId": "8f2a...c1", "recipient": "0501234567" }
 200:      { "challengeId": "9c1b...d0", "expiresAt": "...", "resendAvailableIn": 60 }
 ```
 
 ### `POST /auth/admin/login`
+
 ```json
 Request:  { "email": "admin@trucare.local", "password": "...", "totp": "123456" }
 200:      { "sessionToken": "eyJ...", "adminId": "01J8A..." }
@@ -43,7 +49,9 @@ Request:  { "email": "admin@trucare.local", "password": "...", "totp": "123456" 
 ```
 
 ### `POST /auth/logout`
+
 `Authorization: Bearer <token>` — מסיים את ה-session הנוכחי.
+
 ```json
 200: { "ok": true }
 ```
@@ -53,6 +61,7 @@ Request:  { "email": "admin@trucare.local", "password": "...", "totp": "123456" 
 ## Patients
 
 ### `POST /patients` — הרשמת מטופל (אחרי OTP-verify)
+
 ```json
 Request:
 {
@@ -82,12 +91,15 @@ Request:
 ```
 
 ### `GET /patients/me`
+
 `Authorization: Bearer <patient-token>`
+
 ```json
 200: { "patient": { ...כמו למעלה... } }
 ```
 
 ### `POST /patients/me/consent`
+
 ```json
 Request:
 {
@@ -116,6 +128,7 @@ Request:
 ## Treatment plan & doses
 
 ### `GET /plans/mine`
+
 ```json
 200:
 {
@@ -132,6 +145,7 @@ Request:
 ```
 
 ### `GET /plans/{planId}/doses?from=YYYY-MM-DD&to=YYYY-MM-DD`
+
 ```json
 200:
 {
@@ -151,6 +165,7 @@ Request:
 ```
 
 ### `PATCH /doses/{id}`
+
 ```json
 Request: { "status": "taken", "notes": "לפני ארוחת בוקר" }
 200:
@@ -173,6 +188,7 @@ Request: { "status": "taken", "notes": "לפני ארוחת בוקר" }
 ## Admin
 
 ### `GET /admin/stats`
+
 ```json
 200:
 {
@@ -187,6 +203,7 @@ Request: { "status": "taken", "notes": "לפני ארוחת בוקר" }
 ```
 
 ### `GET /admin/notifications?limit=50&cursor=...`
+
 ```json
 200:
 {
@@ -207,6 +224,7 @@ Request: { "status": "taken", "notes": "לפני ארוחת בוקר" }
 ```
 
 ### `GET /admin/incidents?limit=50&cursor=...`
+
 ```json
 200:
 {
@@ -225,6 +243,7 @@ Request: { "status": "taken", "notes": "לפני ארוחת בוקר" }
 ```
 
 ### `GET /admin/sms/templates`
+
 ```json
 200:
 {
@@ -242,6 +261,7 @@ Request: { "status": "taken", "notes": "לפני ארוחת בוקר" }
 ```
 
 ### `POST /admin/sms/templates`
+
 ```json
 Request:
 { "key": "custom", "name": "מבצע קיץ", "body": "שלום {{firstName}}...", "enabled": true }
@@ -249,17 +269,20 @@ Request:
 ```
 
 ### `PATCH /admin/sms/templates/{id}`
+
 ```json
 Request: { "name": "...", "body": "...", "enabled": false }
 200:     { "template": { ... } }
 ```
 
 ### `DELETE /admin/sms/templates/{id}`
+
 ```json
 200: { "ok": true }
 ```
 
 ### `GET /admin/sms/health`
+
 ```json
 200:
 {
@@ -273,6 +296,7 @@ Request: { "name": "...", "body": "...", "enabled": false }
 ```
 
 ### `POST /admin/sms/test`
+
 ```json
 Request: { "recipient": "0501234567", "templateKey": "morning_reminder" }
 200:     { "ok": true, "providerCode": 1 }

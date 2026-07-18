@@ -28,7 +28,11 @@ function SettingsRoute() {
 
   const save = async () => {
     try {
-      if (!/^https:\/\//.test(baseUrl) && !/^http:\/\/localhost/.test(baseUrl) && !baseUrl.startsWith("/")) {
+      if (
+        !/^https:\/\//.test(baseUrl) &&
+        !/^http:\/\/localhost/.test(baseUrl) &&
+        !baseUrl.startsWith("/")
+      ) {
         toast.error("URL חייב להיות HTTPS או localhost");
         return;
       }
@@ -61,7 +65,9 @@ function SettingsRoute() {
         <div className="flex items-center justify-between">
           <div>
             <Label>שימוש בשרת מוק</Label>
-            <p className="text-xs text-muted-foreground">כשמכובה – הפרונט פונה ל-MySQL אמיתי דרך apiFetch.</p>
+            <p className="text-xs text-muted-foreground">
+              כשמכובה – הפרונט פונה ל-MySQL אמיתי דרך apiFetch.
+            </p>
           </div>
           <Switch checked={useMock} onCheckedChange={setUseMock} />
         </div>
@@ -76,16 +82,29 @@ function SettingsRoute() {
           כל התיעוד הטכני נמצא בפרויקט תחת <code dir="ltr">docs/api/</code>. הקבצים המרכזיים:
         </p>
         <ul className="list-inside list-disc text-xs text-muted-foreground">
-          <li><code dir="ltr">README.md</code> — סקירה, אימות, שגיאות, CORS, PII</li>
-          <li><code dir="ltr">openapi.yaml</code> — חוזה מלא בפורמט OpenAPI 3.1</li>
-          <li><code dir="ltr">endpoints.md</code> — כל ה-endpoints בעברית עם דוגמאות</li>
-          <li><code dir="ltr">schema.sql</code> — 11 טבלאות MySQL 8 (CREATE TABLE + FKs)</li>
-          <li><code dir="ltr">seed.sql</code> — תבניות SMS ראשוניות + משתמש אדמין</li>
-          <li><code dir="ltr">php-notes.md</code> — הנחיות מימוש: JWT, OTP, sms4free, rate-limit</li>
-          <li><code dir="ltr">postman.json</code> — Collection לבדיקה</li>
+          <li>
+            <code dir="ltr">README.md</code> — סקירה, אימות, שגיאות, CORS, PII
+          </li>
+          <li>
+            <code dir="ltr">openapi.yaml</code> — חוזה מלא בפורמט OpenAPI 3.1
+          </li>
+          <li>
+            <code dir="ltr">endpoints.md</code> — כל ה-endpoints בעברית עם דוגמאות
+          </li>
+          <li>
+            <code dir="ltr">schema.sql</code> — 11 טבלאות MySQL 8 (CREATE TABLE + FKs)
+          </li>
+          <li>
+            <code dir="ltr">seed.sql</code> — תבניות SMS ראשוניות + משתמש אדמין
+          </li>
+          <li>
+            <code dir="ltr">php-notes.md</code> — הנחיות מימוש: JWT, OTP, sms4free, rate-limit
+          </li>
+          <li>
+            <code dir="ltr">postman.json</code> — Collection לבדיקה
+          </li>
         </ul>
       </div>
     </div>
   );
 }
-

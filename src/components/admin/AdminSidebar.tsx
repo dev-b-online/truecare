@@ -1,5 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Bell, AlertTriangle, Settings, MessageSquare, FileText } from "lucide-react";
+import {
+  LayoutDashboard,
+  Bell,
+  AlertTriangle,
+  Settings,
+  MessageSquare,
+  FileText,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; end?: boolean };

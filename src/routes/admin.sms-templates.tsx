@@ -60,8 +60,7 @@ function SmsTemplatesRoute() {
   const [editing, setEditing] = useState<SmsTemplate | null>(null);
   const [isNew, setIsNew] = useState(false);
 
-  const invalidate = () =>
-    qc.invalidateQueries({ queryKey: ["admin", "sms-templates"] });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["admin", "sms-templates"] });
 
   return (
     <div className="flex flex-col gap-4">
@@ -87,8 +86,8 @@ function SmsTemplatesRoute() {
 
       <p className="text-sm text-muted-foreground">
         התבניות משמשות לשליחת SMS למטופלים. השתמש/י במשתנים דוגמת{" "}
-        <code className="rounded bg-muted px-1 text-xs" dir="ltr">{`{{firstName}}`}</code>{" "}
-        כדי לשלב מידע דינמי. הטקסט נשמר בבקנד; שדות ה-PII מוזרמים בעת השליחה בלבד.
+        <code className="rounded bg-muted px-1 text-xs" dir="ltr">{`{{firstName}}`}</code> כדי לשלב
+        מידע דינמי. הטקסט נשמר בבקנד; שדות ה-PII מוזרמים בעת השליחה בלבד.
       </p>
 
       <div className="flex flex-col gap-3">
@@ -175,9 +174,7 @@ function TemplateCard({
           </Button>
         </div>
       </div>
-      <div className="rounded-xl bg-background p-3 text-sm leading-relaxed">
-        {template.body}
-      </div>
+      <div className="rounded-xl bg-background p-3 text-sm leading-relaxed">{template.body}</div>
       <div className="rounded-xl border border-dashed border-hair p-3 text-sm text-muted-foreground">
         <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide">
           תצוגה מקדימה (עם ערכי דוגמה)
@@ -260,9 +257,7 @@ function EditorPanel({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4">
       <div className="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-y-auto rounded-t-3xl bg-background p-5 shadow-xl sm:rounded-3xl">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold">
-            {isNew ? "תבנית חדשה" : `עריכה: ${initial.name}`}
-          </h2>
+          <h2 className="text-lg font-bold">{isNew ? "תבנית חדשה" : `עריכה: ${initial.name}`}</h2>
           <button
             onClick={onClose}
             className="rounded-full px-3 py-1 text-sm text-muted-foreground hover:bg-muted"

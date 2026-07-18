@@ -23,9 +23,7 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">הדף לא נמצא</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          הדף שחיפשת לא קיים או הועבר.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">הדף שחיפשת לא קיים או הועבר.</p>
         <div className="mt-6">
           <Link
             to="/"
@@ -49,9 +47,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          הדף לא נטען
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">הדף לא נטען</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           משהו השתבש. נסה לרענן או לחזור לדף הבית.
         </p>
@@ -133,6 +129,13 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const status = useConsent((s) => s.status);
   const location = useRouterState({ select: (s) => s.location });
+  const hydrateFromServer = useConsent((s) => s.hydrateFromServer);
+
+  useEffect(() => {
+    if (status === null) {
+      void hydrateFromServer();
+    }
+  }, [status, hydrateFromServer]);
 
   // Returning visitors who already granted consent: enable GA on load.
   useEffect(() => {

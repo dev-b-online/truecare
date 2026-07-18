@@ -16,14 +16,8 @@ export function DayCard({ cell, onMark }: DayCardProps) {
     <div
       className={cn(
         "flex flex-col gap-2 rounded-2xl border p-3 text-right",
-        isPreStart
-          ? "bg-muted/40"
-          : isBreak
-            ? "bg-turquoise-soft"
-            : "card-tint",
-        cell.isToday
-          ? "border-brand ring-2 ring-brand/60"
-          : "border-hair",
+        isPreStart ? "bg-muted/40" : isBreak ? "bg-turquoise-soft" : "card-tint",
+        cell.isToday ? "border-brand ring-2 ring-brand/60" : "border-hair",
       )}
     >
       <div className="flex items-center justify-between text-xs">
@@ -57,9 +51,7 @@ export function DayCard({ cell, onMark }: DayCardProps) {
             time="08:00"
             status={cell.doses.morning?.status ?? "planned"}
             onMark={
-              cell.doses.morning && onMark
-                ? (s) => onMark(cell.doses.morning!.id, s)
-                : undefined
+              cell.doses.morning && onMark ? (s) => onMark(cell.doses.morning!.id, s) : undefined
             }
           />
           <div className="border-t border-dashed border-destructive/70" aria-hidden />
@@ -68,9 +60,7 @@ export function DayCard({ cell, onMark }: DayCardProps) {
             time="20:00"
             status={cell.doses.evening?.status ?? "planned"}
             onMark={
-              cell.doses.evening && onMark
-                ? (s) => onMark(cell.doses.evening!.id, s)
-                : undefined
+              cell.doses.evening && onMark ? (s) => onMark(cell.doses.evening!.id, s) : undefined
             }
           />
         </div>

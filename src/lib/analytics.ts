@@ -57,10 +57,7 @@ export function trackPageView(path?: string): void {
 }
 
 /** Arbitrary GA4 event. No-op until consent is granted and GA is enabled. */
-export function trackEvent(
-  name: string,
-  params?: Record<string, unknown>,
-): void {
+export function trackEvent(name: string, params?: Record<string, unknown>): void {
   if (!IS_GA_ENABLED || !loaded || typeof window.gtag !== "function") return;
   window.gtag("event", name, params);
 }

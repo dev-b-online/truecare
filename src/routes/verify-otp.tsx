@@ -17,25 +17,19 @@ function VerifyOtpRoute() {
   const s = useOnboarding();
   const nav = useNavigate();
   const [code, setCode] = useState("");
-  const [countdown, setCountdown] = useState(60);
   const [submitting, setSubmitting] = useState(false);
   const [challengeId, setChallengeId] = useState<string | undefined>(s.challengeId);
+  const [rateLimit, setRateLimit] = useState<{ remaining: number; max: number } | null>(null);
   const otpRequested = useRef(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const startCountdown = (seconds: number) => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    setCountdown(seconds);
-    intervalRef.current = setInterval(() => {
-      setCountdown((c) => {
-        if (c <= 1) {
-          clearInterval(intervalRef.current!);
-          intervalRef.current = null;
-          return 0;
-        }
-        return c - 1;
-      });
-    }, 1000);
+  const fetchRateLimit = async () => {
+    try {
+      const r = await api.getRateLimit(s.phone);
+      setRateLimit({ remaining: r.remaining, max: r.max });
+    } catch {
+      setRateLimit(null);
+    }
   };
 
   useEffect(() => {
@@ -48,20 +42,23 @@ function VerifyOtpRoute() {
       // Starting verification means we begin a fresh patient session, so drop
       // any leftover token from a previous (possibly anonymous) session.
       localStorage.removeItem("trucare.session");
-      api.requestOtp(s.phone)
+      api
+        .requestOtp(s.phone)
         .then((r) => {
           setChallengeId(r.challengeId);
           s.set({ challengeId: r.challengeId });
           toast.success("נשלח קוד אימות");
+          void fetchRateLimit();
         })
         .catch((err: Error) => {
           otpRequested.current = false;
           toast.error(err.message);
         });
     }
-    startCountdown(60);
+    void fetchRateLimit();
+    const cleanup = intervalRef.current;
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (cleanup) clearInterval(cleanup);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -89,7 +86,6 @@ function VerifyOtpRoute() {
   };
 
   const doResend = async () => {
-    if (countdown > 0) return;
     try {
       // Resending also means we restart the verification flow — clear any
       // stale session token so the next verified token is the only one used.
@@ -97,7 +93,7 @@ function VerifyOtpRoute() {
       const r = await api.resendOtp(s.phone);
       setChallengeId(r.challengeId);
       s.set({ challengeId: r.challengeId });
-      startCountdown(60);
+      await fetchRateLimit();
       toast.success("נשלח קוד חדש");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שליחה נכשלה");
@@ -128,10 +124,15 @@ function VerifyOtpRoute() {
           type="button"
           className="text-sm text-brand disabled:text-muted-foreground"
           onClick={doResend}
-          disabled={countdown > 0}
+          disabled={submitting}
         >
-          {countdown > 0 ? `שליחה חוזרת בעוד ${countdown} שניות` : "שלח קוד חדש"}
+          שלח קוד חדש
         </button>
+        {rateLimit && (
+          <p className="text-center text-xs text-muted-foreground">
+            יש לך {rateLimit.remaining} מתוך {rateLimit.max} נסיונות לשעה
+          </p>
+        )}
       </div>
     </PageShell>
   );

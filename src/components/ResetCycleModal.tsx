@@ -29,12 +29,10 @@ export function ResetCycleModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm bg-card">
         <DialogHeader>
-          <DialogTitle className="text-center text-xl">
-            איפוס מחזור טיפול
-          </DialogTitle>
+          <DialogTitle className="text-center text-xl">איפוס מחזור טיפול</DialogTitle>
           <DialogDescription className="text-center text-sm text-muted-foreground">
-            כל הנתונים על המחזור הנוכחי יימחקו והמטופל יתחיל מחזור טיפול חדש.
-            בחר/י את תאריך ההתחלה של המחזור החדש.
+            כל הנתונים על המחזור הנוכחי יימחקו והמטופל יתחיל מחזור טיפול חדש. בחר/י את תאריך ההתחלה
+            של המחזור החדש.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-1">
@@ -58,9 +56,7 @@ export function ResetCycleModal({
             variant="destructive"
             className="rounded-full px-6"
             onClick={() => {
-              const el = document.getElementById(
-                "reset-start",
-              ) as HTMLInputElement | null;
+              const el = document.getElementById("reset-start") as HTMLInputElement | null;
               onConfirm(el?.value ?? value);
             }}
           >

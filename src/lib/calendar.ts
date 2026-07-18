@@ -3,8 +3,18 @@ import type { DoseEvent, DoseSlot, DoseStatus } from "./api/types";
 
 export const HEBREW_WEEKDAYS_SHORT = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
 export const HEBREW_MONTHS = [
-  "ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני",
-  "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר",
+  "ינואר",
+  "פברואר",
+  "מרץ",
+  "אפריל",
+  "מאי",
+  "יוני",
+  "יולי",
+  "אוגוסט",
+  "ספטמבר",
+  "אוקטובר",
+  "נובמבר",
+  "דצמבר",
 ];
 
 export interface DayCell {
@@ -27,7 +37,7 @@ export interface DayCell {
 export function computeCycleDay(startDateIso: string, target: Date): number {
   const start = startOfDay(parseISO(startDateIso));
   const diff = differenceInCalendarDays(startOfDay(target), start);
-  return ((diff % 7) + 7) % 7 + 1; // 1..7 (negative-safe)
+  return (((diff % 7) + 7) % 7) + 1; // 1..7 (negative-safe)
 }
 
 export function isTreatmentDay(cycleDay: number): boolean {

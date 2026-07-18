@@ -232,7 +232,9 @@ export const mockApi = {
     });
     return p;
   },
-  async saveConsent(record: Omit<ConsentRecord, "id" | "signatureHmac" | "acceptedAt">): Promise<ConsentRecord> {
+  async saveConsent(
+    record: Omit<ConsentRecord, "id" | "signatureHmac" | "acceptedAt">,
+  ): Promise<ConsentRecord> {
     await latency();
     const r: ConsentRecord = {
       ...record,

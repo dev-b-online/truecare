@@ -33,7 +33,10 @@
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": "{{baseUrl}}/auth/otp/request",
-            "body": { "mode": "raw", "raw": "{\n  \"channel\": \"sms\",\n  \"recipient\": \"0501234567\"\n}" }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": \"sms\",\n  \"recipient\": \"0501234567\"\n}"
+            }
           }
         },
         {
@@ -42,7 +45,10 @@
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": "{{baseUrl}}/auth/otp/verify",
-            "body": { "mode": "raw", "raw": "{\n  \"challengeId\": \"{{challengeId}}\",\n  \"code\": \"123456\"\n}" }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"challengeId\": \"{{challengeId}}\",\n  \"code\": \"123456\"\n}"
+            }
           }
         },
         {
@@ -51,7 +57,10 @@
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": "{{baseUrl}}/auth/admin/login",
-            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@trucare.local\",\n  \"password\": \"ChangeMe!2026\"\n}" }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@trucare.local\",\n  \"password\": \"ChangeMe!2026\"\n}"
+            }
           }
         },
         {
@@ -73,7 +82,10 @@
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": "{{baseUrl}}/patients",
-            "body": { "mode": "raw", "raw": "{\n  \"challengeId\": \"{{challengeId}}\",\n  \"firstName\": \"יעל\",\n  \"channel\": \"sms\",\n  \"phone\": \"0501234567\",\n  \"startDate\": \"2026-07-05\",\n  \"reminders\": \"on\"\n}" }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"challengeId\": \"{{challengeId}}\",\n  \"firstName\": \"יעל\",\n  \"channel\": \"sms\",\n  \"phone\": \"0501234567\",\n  \"startDate\": \"2026-07-05\",\n  \"reminders\": \"on\"\n}"
+            }
           }
         },
         {
@@ -93,7 +105,10 @@
               { "key": "Content-Type", "value": "application/json" }
             ],
             "url": "{{baseUrl}}/patients/me/consent",
-            "body": { "mode": "raw", "raw": "{\n  \"termsVersion\": \"2026-01\",\n  \"privacyPolicyVersion\": \"2026-01\",\n  \"disclaimerVersion\": \"2026-01\",\n  \"marketingOptIn\": false\n}" }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"termsVersion\": \"2026-01\",\n  \"privacyPolicyVersion\": \"2026-01\",\n  \"disclaimerVersion\": \"2026-01\",\n  \"marketingOptIn\": false\n}"
+            }
           }
         }
       ]
@@ -126,7 +141,10 @@
               { "key": "Content-Type", "value": "application/json" }
             ],
             "url": "{{baseUrl}}/doses/{{doseId}}",
-            "body": { "mode": "raw", "raw": "{\n  \"status\": \"taken\",\n  \"notes\": \"לפני ארוחת בוקר\"\n}" }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"taken\",\n  \"notes\": \"לפני ארוחת בוקר\"\n}"
+            }
           }
         }
       ]
@@ -175,7 +193,10 @@
               { "key": "Content-Type", "value": "application/json" }
             ],
             "url": "{{baseUrl}}/admin/sms/templates",
-            "body": { "mode": "raw", "raw": "{\n  \"key\": \"custom\",\n  \"name\": \"מבצע קיץ\",\n  \"body\": \"שלום {{firstName}}\",\n  \"enabled\": true\n}" }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"custom\",\n  \"name\": \"מבצע קיץ\",\n  \"body\": \"שלום {{firstName}}\",\n  \"enabled\": true\n}"
+            }
           }
         },
         {
@@ -187,7 +208,10 @@
               { "key": "Content-Type", "value": "application/json" }
             ],
             "url": "{{baseUrl}}/admin/sms/templates/{{templateId}}",
-            "body": { "mode": "raw", "raw": "{\n  \"name\": \"תזכורת בוקר\",\n  \"body\": \"בוקר טוב {{firstName}}\",\n  \"enabled\": true\n}" }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"תזכורת בוקר\",\n  \"body\": \"בוקר טוב {{firstName}}\",\n  \"enabled\": true\n}"
+            }
           }
         },
         {
@@ -215,7 +239,10 @@
               { "key": "Content-Type", "value": "application/json" }
             ],
             "url": "{{baseUrl}}/admin/sms/test",
-            "body": { "mode": "raw", "raw": "{\n  \"recipient\": \"0501234567\",\n  \"templateKey\": \"morning_reminder\"\n}" }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient\": \"0501234567\",\n  \"templateKey\": \"morning_reminder\"\n}"
+            }
           }
         }
       ]

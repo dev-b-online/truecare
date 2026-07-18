@@ -31,7 +31,7 @@ paths:
       security: []
       summary: Health check
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -59,13 +59,13 @@ paths:
                 channel: { type: string, enum: [sms] }
                 recipient: { type: string, pattern: '^05\d{8}$' }
       responses:
-        '200':
+        "200":
           description: Challenge created
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/OtpRequestResult' }
-        '429': { $ref: '#/components/responses/RateLimited' }
-        '400': { $ref: '#/components/responses/ValidationError' }
+              schema: { $ref: "#/components/schemas/OtpRequestResult" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "400": { $ref: "#/components/responses/ValidationError" }
 
   /auth/otp/verify:
     post:
@@ -83,12 +83,12 @@ paths:
                 challengeId: { type: string, minLength: 16 }
                 code: { type: string, pattern: '^\d{6}$' }
       responses:
-        '200':
+        "200":
           description: Verified
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/OtpVerifyResult' }
-        '400': { $ref: '#/components/responses/OtpInvalid' }
+              schema: { $ref: "#/components/schemas/OtpVerifyResult" }
+        "400": { $ref: "#/components/responses/OtpInvalid" }
 
   /auth/otp/resend:
     post:
@@ -106,12 +106,12 @@ paths:
                 challengeId: { type: string }
                 recipient: { type: string, pattern: '^05\d{8}$' }
       responses:
-        '200':
+        "200":
           description: New challenge
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/OtpRequestResult' }
-        '429': { $ref: '#/components/responses/RateLimited' }
+              schema: { $ref: "#/components/schemas/OtpRequestResult" }
+        "429": { $ref: "#/components/responses/RateLimited" }
 
   /auth/admin/login:
     post:
@@ -130,7 +130,7 @@ paths:
                 password: { type: string, minLength: 8 }
                 totp: { type: string, pattern: '^\d{6}$' }
       responses:
-        '200':
+        "200":
           description: Session
           content:
             application/json:
@@ -140,14 +140,14 @@ paths:
                 properties:
                   sessionToken: { type: string }
                   adminId: { type: string }
-        '401': { $ref: '#/components/responses/Unauthorized' }
+        "401": { $ref: "#/components/responses/Unauthorized" }
 
   /auth/logout:
     post:
       tags: [Auth]
       summary: Revoke the current session
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -177,7 +177,7 @@ paths:
                 startDate: { type: string, format: date }
                 reminders: { type: string, enum: [on, off] }
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
@@ -185,24 +185,24 @@ paths:
                 type: object
                 required: [patient, sessionToken]
                 properties:
-                  patient: { $ref: '#/components/schemas/Patient' }
+                  patient: { $ref: "#/components/schemas/Patient" }
                   sessionToken: { type: string }
-        '409': { $ref: '#/components/responses/Conflict' }
-        '400': { $ref: '#/components/responses/ValidationError' }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "400": { $ref: "#/components/responses/ValidationError" }
 
   /patients/me:
     get:
       tags: [Patients]
       summary: Current patient
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  patient: { $ref: '#/components/schemas/Patient' }
+                  patient: { $ref: "#/components/schemas/Patient" }
 
   /patients/me/consent:
     post:
@@ -221,28 +221,28 @@ paths:
                 disclaimerVersion: { type: string }
                 marketingOptIn: { type: boolean }
       responses:
-        '201':
+        "201":
           description: Stored
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  consent: { $ref: '#/components/schemas/ConsentRecord' }
+                  consent: { $ref: "#/components/schemas/ConsentRecord" }
 
   /plans/mine:
     get:
       tags: [Plans]
       summary: Current patient's plan
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  plan: { $ref: '#/components/schemas/TreatmentPlan' }
+                  plan: { $ref: "#/components/schemas/TreatmentPlan" }
 
   /plans/{planId}/doses:
     get:
@@ -260,7 +260,7 @@ paths:
           name: to
           schema: { type: string, format: date }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -269,7 +269,7 @@ paths:
                 properties:
                   doses:
                     type: array
-                    items: { $ref: '#/components/schemas/DoseEvent' }
+                    items: { $ref: "#/components/schemas/DoseEvent" }
 
   /doses/{id}:
     patch:
@@ -290,27 +290,27 @@ paths:
                 status: { type: string, enum: [taken, missed, planned, not_required] }
                 notes: { type: string, maxLength: 500 }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  dose: { $ref: '#/components/schemas/DoseEvent' }
-        '404': { $ref: '#/components/responses/NotFound' }
+                  dose: { $ref: "#/components/schemas/DoseEvent" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
   /admin/stats:
     get:
       tags: [Admin]
       summary: KPI stats
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/AdminStats' }
-        '403': { $ref: '#/components/responses/Forbidden' }
+              schema: { $ref: "#/components/schemas/AdminStats" }
+        "403": { $ref: "#/components/responses/Forbidden" }
 
   /admin/notifications:
     get:
@@ -324,7 +324,7 @@ paths:
           name: cursor
           schema: { type: string, nullable: true }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -333,7 +333,7 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: '#/components/schemas/NotificationLog' }
+                    items: { $ref: "#/components/schemas/NotificationLog" }
                   nextCursor: { type: string, nullable: true }
 
   /admin/incidents:
@@ -348,7 +348,7 @@ paths:
           name: cursor
           schema: { type: string, nullable: true }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -357,7 +357,7 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: '#/components/schemas/IncidentLog' }
+                    items: { $ref: "#/components/schemas/IncidentLog" }
                   nextCursor: { type: string, nullable: true }
 
   /admin/sms/templates:
@@ -365,7 +365,7 @@ paths:
       tags: [AdminSMS]
       summary: List SMS templates
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -374,7 +374,7 @@ paths:
                 properties:
                   items:
                     type: array
-                    items: { $ref: '#/components/schemas/SmsTemplate' }
+                    items: { $ref: "#/components/schemas/SmsTemplate" }
     post:
       tags: [AdminSMS]
       summary: Create SMS template
@@ -382,16 +382,16 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/SmsTemplateInput' }
+            schema: { $ref: "#/components/schemas/SmsTemplateInput" }
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  template: { $ref: '#/components/schemas/SmsTemplate' }
+                  template: { $ref: "#/components/schemas/SmsTemplate" }
 
   /admin/sms/templates/{id}:
     patch:
@@ -406,16 +406,16 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/SmsTemplateInput' }
+            schema: { $ref: "#/components/schemas/SmsTemplateInput" }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  template: { $ref: '#/components/schemas/SmsTemplate' }
+                  template: { $ref: "#/components/schemas/SmsTemplate" }
     delete:
       tags: [AdminSMS]
       summary: Delete SMS template
@@ -425,7 +425,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -439,11 +439,11 @@ paths:
       tags: [AdminSMS]
       summary: SMS provider status (masked)
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/SmsConfigView' }
+              schema: { $ref: "#/components/schemas/SmsConfigView" }
 
   /admin/sms/test:
     post:
@@ -458,10 +458,10 @@ paths:
               required: [recipient]
               properties:
                 recipient: { type: string, pattern: '^05\d{8}$' }
-                templateKey: { $ref: '#/components/schemas/SmsTemplateKey' }
+                templateKey: { $ref: "#/components/schemas/SmsTemplateKey" }
                 message: { type: string, maxLength: 480 }
       responses:
-        '200':
+        "200":
           description: Sent
           content:
             application/json:
@@ -470,7 +470,7 @@ paths:
                 properties:
                   ok: { type: boolean }
                   providerCode: { type: integer }
-        '502': { $ref: '#/components/responses/SmsProviderError' }
+        "502": { $ref: "#/components/responses/SmsProviderError" }
 
 components:
   securitySchemes:
@@ -572,7 +572,7 @@ components:
       type: object
       properties:
         id: { type: string }
-        key: { $ref: '#/components/schemas/SmsTemplateKey' }
+        key: { $ref: "#/components/schemas/SmsTemplateKey" }
         name: { type: string }
         body: { type: string, maxLength: 480 }
         enabled: { type: boolean }
@@ -583,7 +583,7 @@ components:
       type: object
       required: [key, name, body, enabled]
       properties:
-        key: { $ref: '#/components/schemas/SmsTemplateKey' }
+        key: { $ref: "#/components/schemas/SmsTemplateKey" }
         name: { type: string, maxLength: 120 }
         body: { type: string, maxLength: 480 }
         enabled: { type: boolean }
@@ -630,27 +630,27 @@ components:
       description: Validation error
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
     Unauthorized:
       description: Missing or invalid token
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
     Forbidden:
       description: Insufficient role
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
     NotFound:
       description: Resource not found
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
     Conflict:
       description: Conflict / duplicate
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
     RateLimited:
       description: Rate limit exceeded
       headers:
@@ -658,14 +658,14 @@ components:
           schema: { type: integer }
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
     OtpInvalid:
       description: OTP invalid / expired / consumed
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }
     SmsProviderError:
       description: sms4free returned an error code
       content:
         application/json:
-          schema: { $ref: '#/components/schemas/Error' }
+          schema: { $ref: "#/components/schemas/Error" }

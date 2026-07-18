@@ -19,8 +19,9 @@ interface Challenge {
 const g = globalThis as unknown as { __trucare_otp?: Map<string, Challenge> };
 const store: Map<string, Challenge> = g.__trucare_otp ?? (g.__trucare_otp = new Map());
 
-const rateBucket: Map<string, number[]> = ((globalThis as unknown as { __trucare_rate?: Map<string, number[]> }).__trucare_rate ??=
-  new Map());
+const rateBucket: Map<string, number[]> = ((
+  globalThis as unknown as { __trucare_rate?: Map<string, number[]> }
+).__trucare_rate ??= new Map());
 
 function hitLimit(key: string, windowMs: number, max: number) {
   const now = Date.now();
@@ -41,7 +42,9 @@ async function sha256(input: string) {
 function randomId() {
   const arr = new Uint8Array(16);
   crypto.getRandomValues(arr);
-  return Array.from(arr).map((b) => b.toString(16).padStart(2, "0")).join("");
+  return Array.from(arr)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function randomCode() {
@@ -51,9 +54,7 @@ function randomCode() {
 }
 
 export const requestOtp = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) =>
-    z.object({ phone: z.string().regex(/^05\d{8}$/) }).parse(data),
-  )
+  .inputValidator((data: unknown) => z.object({ phone: z.string().regex(/^05\d{8}$/) }).parse(data))
   .handler(async ({ data }) => {
     const phoneHash = await sha256(data.phone);
     if (hitLimit(`otp:${phoneHash}`, 60 * 60 * 1000, 3)) {

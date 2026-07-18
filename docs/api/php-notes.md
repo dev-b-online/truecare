@@ -5,6 +5,7 @@
 ## דרישות (מותאם לשרת cPanel/CloudLinux)
 
 **סביבה שנבדקה:**
+
 - PHP **8.0** (התאימות הגבוהה ביותר שנתמכת בשרת)
 - MariaDB **10.3.39** (תואם ל-MySQL 5.7/8.0 בפועל)
 - Apache **2.4.58** דרך cPanel
@@ -15,11 +16,13 @@
 `sodium` אופציונלי (משמש רק אם עוברים ל-libsodium במקום `openssl_encrypt`).
 
 **כלים נוספים:**
+
 - Composer (`composer.phar` מקומי מספיק, לא חייב התקנה גלובלית)
 - HTTPS דרך AutoSSL של cPanel (TLS 1.2+)
 - Cron של cPanel לניקוי טבלאות (`cPanel → Cron Jobs`)
 
 **מגבלות PHP 8.0 (לא להשתמש):**
+
 - אין `readonly` properties (8.1)
 - אין enums (8.1) — להשתמש ב-class constants
 - אין `never` return type (8.1)
@@ -28,6 +31,7 @@
   `str_contains`/`str_starts_with`, `Stringable`, JIT.
 
 **מגבלות MariaDB 10.3 (לא להשתמש):**
+
 - אין functional/expression indexes (10.5+) — משתמשים ב-generated column
   PERSISTENT ואינדקס עליו (`sms_templates.key_unique` בסכימה).
 - אין `JSON_TABLE` (10.6+). `JSON_EXTRACT` וסוגריים `->>` **כן** נתמכים.
@@ -123,6 +127,7 @@ SMS4FREE_SENDER=TruCare
 ```
 
 לייצור מפתחות אקראיים:
+
 ```bash
 php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"
 ```
@@ -228,9 +233,15 @@ final class Sms4Free {
 ## JWT (HS256)
 
 השתמש ב-`firebase/php-jwt` (composer). Claims:
+
 ```json
-{ "sub": "<subject_id>", "type": "patient|admin", "iat": 1720170000,
-  "exp": 1722762000, "jti": "<random hex 16>" }
+{
+  "sub": "<subject_id>",
+  "type": "patient|admin",
+  "iat": 1720170000,
+  "exp": 1722762000,
+  "jti": "<random hex 16>"
+}
 ```
 
 בכל login: הכנס ל-`sessions` עם `token_hash = hash('sha256', $jwt)`.
@@ -263,6 +274,7 @@ public function isOver(string $key, int $windowSec, int $max): bool {
 ```
 
 תוכן `cleanup.php` (מריץ את שלושת ה-DELETE דרך PDO):
+
 ```sql
 DELETE FROM rate_limits    WHERE occurred_at < NOW() - INTERVAL 1 DAY;
 DELETE FROM otp_challenges WHERE expires_at  < NOW() - INTERVAL 1 DAY;
@@ -270,6 +282,7 @@ DELETE FROM sessions       WHERE expires_at  < NOW() OR revoked_at IS NOT NULL;
 ```
 
 **הערה לפריסה ב-cPanel:**
+
 - שים את `public/` כ-Document Root (או צור `.htaccess` ב-`public_html`
   שמפנה הכל ל-`public/index.php`).
 - אין להעלות את `.env`, `vendor/`, או `src/` אל תוך `public_html/`.
