@@ -2,6 +2,65 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { PatientAuthMenu } from "@/components/PatientAuthMenu";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+
+const CONSENT_COOKIE = "trucare_consent";
+
+function getConsent(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp("(^| )" + CONSENT_COOKIE + "=([^;]+)"));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+function setConsent(value: string) {
+  if (typeof document === "undefined") return;
+  const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+  document.cookie = `${CONSENT_COOKIE}=${encodeURIComponent(value)}; path=/; expires=${expires}; samesite=lax`;
+}
+
+function CookieConsentBanner() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const consent = getConsent();
+    setVisible(consent === null);
+  }, []);
+
+  const accept = () => {
+    setConsent("granted");
+    setVisible(false);
+  };
+
+  const decline = () => {
+    setConsent("denied");
+    setVisible(false);
+  };
+
+  if (!visible) return null;
+
+  return (
+    <div
+      role="dialog"
+      aria-label="הסכמה לעוגיות"
+      className="fixed inset-x-0 bottom-0 z-50 w-full border-t border-hair bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+    >
+      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <p className="text-right text-sm leading-relaxed text-muted-foreground">
+          אנו משתמשים בעוגיות לניתוח שימוש באתר ולשיפור החוויה. לא ייאסף מידע רפואי.
+        </p>
+        <div className="flex shrink-0 items-center justify-end gap-2">
+          <Button variant="ghost" size="sm" onClick={decline} className="rounded-full">
+            לדחות
+          </Button>
+          <Button size="sm" onClick={accept} className="rounded-full">
+            אישור
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface PageShellProps {
   children: ReactNode;
@@ -37,6 +96,7 @@ export function PageShell({ children, className, hideHeader, wide }: PageShellPr
           </div>
         </div>
       </footer>
+      <CookieConsentBanner />
     </div>
   );
 }
