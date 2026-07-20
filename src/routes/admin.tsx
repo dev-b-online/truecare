@@ -15,10 +15,18 @@ const ADMIN_TOKEN_KEY = "trucare.admin.session";
 
 export const Route = createFileRoute("/admin")({
   component: AdminRoute,
-  head: () => ({ meta: [{ title: "אדמין | TruCare" }] }),
-  beforeLoad: () => {
-    // Redirect to login if no admin token
-    if (typeof window !== "undefined" && !localStorage.getItem(ADMIN_TOKEN_KEY)) {
+  beforeLoad: async () => {
+    if (typeof window === "undefined") return;
+
+    const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+    if (!token) {
+      throw redirect({ to: "/admin/login" });
+    }
+
+    try {
+      await api.getStats();
+    } catch {
+      localStorage.removeItem(ADMIN_TOKEN_KEY);
       throw redirect({ to: "/admin/login" });
     }
   },
