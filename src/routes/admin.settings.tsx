@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { adminBeforeLoad } from "@/lib/adminAuth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/settings")({
+  beforeLoad: adminBeforeLoad,
   component: SettingsRoute,
   head: () => ({ meta: [{ title: "הגדרות API | TruCare אדמין" }] }),
 });

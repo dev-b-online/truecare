@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { api, type SmsTemplate, type SmsTemplateKey } from "@/lib/api";
+import { adminBeforeLoad } from "@/lib/adminAuth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import { sendSms } from "@/lib/sms/sms4free.functions";
 import { IL_PHONE_REGEX } from "@/lib/validation";
 
 export const Route = createFileRoute("/admin/sms-templates")({
+  beforeLoad: adminBeforeLoad,
   component: SmsTemplatesRoute,
   head: () => ({
     meta: [

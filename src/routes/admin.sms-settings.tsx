@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { adminBeforeLoad } from "@/lib/adminAuth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { toast } from "sonner";
 import { IL_PHONE_REGEX } from "@/lib/validation";
 
 export const Route = createFileRoute("/admin/sms-settings")({
+  beforeLoad: adminBeforeLoad,
   component: SmsSettingsRoute,
   head: () => ({ meta: [{ title: "הגדרות SMS | TruCare אדמין" }] }),
 });

@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { adminBeforeLoad } from "@/lib/adminAuth";
 import { format, parseISO } from "date-fns";
 
 export const Route = createFileRoute("/admin/notifications")({
+  beforeLoad: adminBeforeLoad,
   component: NotificationsRoute,
   head: () => ({ meta: [{ title: "יומן הודעות | TruCare אדמין" }] }),
 });
