@@ -9,48 +9,33 @@ import { PageShell } from "@/components/PageShell";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const ADMIN_TOKEN_KEY = "trucare.admin.session";
 
 export const Route = createFileRoute("/admin")({
-  component: AdminRoute,
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !localStorage.getItem(ADMIN_TOKEN_KEY)) {
+  beforeLoad: async () => {
+    if (typeof window === "undefined") return;
+
+    const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+    if (!token) {
+      throw redirect({ to: "/admin/login" });
+    }
+
+    try {
+      await api.getStats();
+    } catch {
+      localStorage.removeItem(ADMIN_TOKEN_KEY);
       throw redirect({ to: "/admin/login" });
     }
   },
+  component: AdminRoute,
 });
 
 function AdminRoute() {
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const isRoot = path === "/admin";
-  const [verifying, setVerifying] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function verify() {
-      try {
-        await api.getStats();
-      } catch {
-        localStorage.removeItem(ADMIN_TOKEN_KEY);
-        if (!cancelled) {
-          navigate({ to: "/admin/login" });
-        }
-        return;
-      }
-      if (!cancelled) {
-        setVerifying(false);
-      }
-    }
-
-    void verify();
-    return () => {
-      cancelled = true;
-    };
-  }, [navigate]);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -63,16 +48,6 @@ function AdminRoute() {
     window.addEventListener("trucare:api:unauthorized", handler);
     return () => window.removeEventListener("trucare:api:unauthorized", handler);
   }, [navigate]);
-
-  if (verifying) {
-    return (
-      <PageShell wide>
-        <div className="flex items-center justify-center py-20">
-          <span className="text-sm text-muted-foreground">טוען...</span>
-        </div>
-      </PageShell>
-    );
-  }
 
   return (
     <PageShell wide>
