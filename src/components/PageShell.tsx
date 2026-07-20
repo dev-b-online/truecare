@@ -12,17 +12,31 @@ interface PageShellProps {
 
 export function PageShell({ children, className, hideHeader, wide }: PageShellProps) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       {!hideHeader && <TruCareHeader />}
       <main
         className={cn(
-          "mx-auto w-full px-4 pb-16 pt-6 sm:px-6",
+          "mx-auto w-full flex-1 px-4 pb-16 pt-6 sm:px-6",
           wide ? "max-w-6xl" : "max-w-xl",
           className,
         )}
       >
         {children}
       </main>
+      <footer className="border-t border-hair bg-background">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-4 sm:flex-row sm:px-6">
+          <img
+            src="/AstraZeneca-Logo.png"
+            alt="AstraZeneca"
+            className="h-12 w-auto object-contain"
+          />
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <Link to="/terms-of-use" className="hover:text-foreground">תנאי שימוש</Link>
+            <Link to="/privacy-policy" className="hover:text-foreground">מדיניות פרטיות</Link>
+            <span>POWERED BY B-ONLINE</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

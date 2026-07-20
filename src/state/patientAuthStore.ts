@@ -11,7 +11,6 @@
 // server and first client render agree (no hydration mismatch).
 import { create } from "zustand";
 import { api, type Patient } from "@/lib/api";
-import { useConsent, CONSENT_VERSION } from "@/state/consentStore";
 
 export const PATIENT_TOKEN_KEY = "trucare.session";
 
@@ -66,17 +65,6 @@ export const usePatientAuth = create<PatientAuthState>((set) => ({
     try {
       const patient = await api.getMe();
       if (seq === authSeq) set({ status: "authenticated", patient });
-
-      // If the user already made a consent choice in the browser before
-      // logging in, mirror it to the DB now that we have an authenticated
-      // session. This avoids re-prompting later on another device.
-      const localConsent = useConsent.getState().status;
-      if (localConsent === "granted" || localConsent === "denied") {
-        void api
-          .saveCookieConsent({ status: localConsent, version: CONSENT_VERSION })
-          .catch(() => {});
-      }
-
       return patient;
     } catch {
       if (typeof localStorage !== "undefined") {

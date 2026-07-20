@@ -337,24 +337,6 @@ export const realApi = {
     }
   },
 
-  // ── Cookie consent (long-term DB mirror) ────────────────
-  async saveCookieConsent(input: {
-    status: "granted" | "denied";
-    version?: number;
-  }): Promise<{ ok: boolean; status: string }> {
-    return req(
-      `/patients/me/cookie-consent`,
-      {
-        method: "POST",
-        body: JSON.stringify({ status: input.status, version: input.version }),
-      },
-      "patient",
-    );
-  },
-  async getCookieConsent(): Promise<{ status: "granted" | "denied" | null; version: number }> {
-    return req(`/patients/me/cookie-consent`, {}, "patient");
-  },
-
   // ── Helpers (no-op stubs, server handles these) ──────────────
   addNotification() {},
   addIncident() {},
