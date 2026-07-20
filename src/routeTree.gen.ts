@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyOtpRouteImport } from './routes/verify-otp'
+import { Route as TermsOfUseRouteImport } from './routes/terms-of-use'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as InstructionsRouteImport } from './routes/instructions'
 import { Route as DiaryRouteImport } from './routes/diary'
@@ -29,9 +31,19 @@ const VerifyOtpRoute = VerifyOtpRouteImport.update({
   path: '/verify-otp',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsOfUseRoute = TermsOfUseRouteImport.update({
+  id: '/terms-of-use',
+  path: '/terms-of-use',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -102,7 +114,9 @@ export interface FileRoutesByFullPath {
   '/diary': typeof DiaryRoute
   '/instructions': typeof InstructionsRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/register': typeof RegisterRoute
+  '/terms-of-use': typeof TermsOfUseRoute
   '/verify-otp': typeof VerifyOtpRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -118,7 +132,9 @@ export interface FileRoutesByTo {
   '/diary': typeof DiaryRoute
   '/instructions': typeof InstructionsRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/register': typeof RegisterRoute
+  '/terms-of-use': typeof TermsOfUseRoute
   '/verify-otp': typeof VerifyOtpRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -135,7 +151,9 @@ export interface FileRoutesById {
   '/diary': typeof DiaryRoute
   '/instructions': typeof InstructionsRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/register': typeof RegisterRoute
+  '/terms-of-use': typeof TermsOfUseRoute
   '/verify-otp': typeof VerifyOtpRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -153,7 +171,9 @@ export interface FileRouteTypes {
     | '/diary'
     | '/instructions'
     | '/onboarding'
+    | '/privacy-policy'
     | '/register'
+    | '/terms-of-use'
     | '/verify-otp'
     | '/admin/incidents'
     | '/admin/login'
@@ -169,7 +189,9 @@ export interface FileRouteTypes {
     | '/diary'
     | '/instructions'
     | '/onboarding'
+    | '/privacy-policy'
     | '/register'
+    | '/terms-of-use'
     | '/verify-otp'
     | '/admin/incidents'
     | '/admin/login'
@@ -185,7 +207,9 @@ export interface FileRouteTypes {
     | '/diary'
     | '/instructions'
     | '/onboarding'
+    | '/privacy-policy'
     | '/register'
+    | '/terms-of-use'
     | '/verify-otp'
     | '/admin/incidents'
     | '/admin/login'
@@ -202,7 +226,9 @@ export interface RootRouteChildren {
   DiaryRoute: typeof DiaryRoute
   InstructionsRoute: typeof InstructionsRoute
   OnboardingRoute: typeof OnboardingRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   RegisterRoute: typeof RegisterRoute
+  TermsOfUseRoute: typeof TermsOfUseRoute
   VerifyOtpRoute: typeof VerifyOtpRoute
 }
 
@@ -215,11 +241,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerifyOtpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms-of-use': {
+      id: '/terms-of-use'
+      path: '/terms-of-use'
+      fullPath: '/terms-of-use'
+      preLoaderRoute: typeof TermsOfUseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -336,7 +376,9 @@ const rootRouteChildren: RootRouteChildren = {
   DiaryRoute: DiaryRoute,
   InstructionsRoute: InstructionsRoute,
   OnboardingRoute: OnboardingRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
   RegisterRoute: RegisterRoute,
+  TermsOfUseRoute: TermsOfUseRoute,
   VerifyOtpRoute: VerifyOtpRoute,
 }
 export const routeTree = rootRouteImport

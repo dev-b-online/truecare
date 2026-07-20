@@ -1,0 +1,1 @@
+import{h as e}from"./PageShell-CWjaTIxX.js";var t=new Date().toISOString().slice(0,10),n=e(e=>({firstName:``,channel:`sms`,phone:``,email:``,startDate:t,reminders:`on`,challengeId:void 0,set:t=>e(t),clear:()=>e({firstName:``,channel:`sms`,phone:``,email:``,startDate:t,reminders:`on`,challengeId:void 0})}));export{n as t};
