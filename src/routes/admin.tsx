@@ -39,10 +39,10 @@ function AdminRoute() {
         if (!cancelled) {
           navigate({ to: "/admin/login" });
         }
-      } finally {
-        if (!cancelled) {
-          setVerifying(false);
-        }
+        return;
+      }
+      if (!cancelled) {
+        setVerifying(false);
       }
     }
 
