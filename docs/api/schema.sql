@@ -105,17 +105,21 @@ CREATE TABLE IF NOT EXISTS consents (
 
 -- ---------------------------------------------------------------------------
 -- 5) otp_challenges
+-- Supports both SMS (phone_hash) and email (email_hash) OTP flows.
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS otp_challenges (
   id             CHAR(32)     NOT NULL,           -- hex(random_bytes(16))
-  phone_hash     CHAR(64)     NOT NULL,
+  phone_hash     CHAR(64)     NULL,
+  email_hash     CHAR(64)     NULL,
   code_hash      VARCHAR(255) NOT NULL,           -- argon2id
+  channel        ENUM('sms','email') NOT NULL DEFAULT 'sms',
   attempts       TINYINT UNSIGNED NOT NULL DEFAULT 0,
   expires_at     DATETIME(3)  NOT NULL,
   consumed_at    DATETIME(3)  NULL,
   created_at     DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   PRIMARY KEY (id),
   KEY idx_otp_phone_created (phone_hash, created_at),
+  KEY idx_otp_email_created (email_hash, created_at),
   KEY idx_otp_expires (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -180,7 +184,30 @@ CREATE TABLE IF NOT EXISTS sms_templates (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
--- 9) notification_logs — masked-only, safe to expose in admin UI
+-- 9) email_templates — mirrors sms_templates but with an email-specific subject
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS email_templates (
+  id             CHAR(26)     NOT NULL,
+  key_name       ENUM('welcome','morning_reminder','evening_reminder',
+                      'missed_dose','otp_code','custom','start_treatment','day_off') NOT NULL,
+  key_unique     VARCHAR(32)  AS (IF(key_name = 'custom', NULL, key_name)) PERSISTENT,
+  name           VARCHAR(120) NOT NULL,
+  subject        VARCHAR(180) NOT NULL,
+  body           TEXT         NOT NULL,
+  enabled        TINYINT(1)   NOT NULL DEFAULT 1,
+  updated_at     DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+                              ON UPDATE CURRENT_TIMESTAMP(3),
+  updated_by     CHAR(26)     NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_email_templates_unique_key (key_unique),
+  KEY idx_email_templates_key (key_name),
+  CONSTRAINT fk_email_templates_admin
+    FOREIGN KEY (updated_by) REFERENCES admin_users(id)
+    ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- 10) notification_logs — masked-only, safe to expose in admin UI
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS notification_logs (
   id                 CHAR(26)     NOT NULL,

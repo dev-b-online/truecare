@@ -53,11 +53,7 @@ function RegisterRoute() {
       }
     }
 
-    if (s.channel === "sms") {
-      nav({ to: "/verify-otp" });
-    } else {
-      nav({ to: "/consent" });
-    }
+    nav({ to: "/verify-otp" });
   };
 
   return (

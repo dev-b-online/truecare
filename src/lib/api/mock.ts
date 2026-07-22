@@ -6,6 +6,8 @@ import type {
   ApiSettings,
   ConsentRecord,
   DoseEvent,
+  EmailTemplate,
+  EmailTemplateKey,
   IncidentLog,
   NotificationLog,
   Patient,
@@ -169,6 +171,81 @@ const smsTemplates: SmsTemplate[] = [
   },
 ];
 
+const emailTemplates: EmailTemplate[] = [
+  {
+    id: uid(),
+    key: "welcome",
+    name: "ברוכים הבאים",
+    subject: "ברוכים הבאים ל-TruCare",
+    body: "<p>שלום {{firstName}},</p><p>ברוך/ה הבא/ה ל-TruCare. נלווה אותך לאורך הטיפול.</p>",
+    enabled: true,
+    updatedAt: subDays(now(), 10).toISOString(),
+  },
+  {
+    id: uid(),
+    key: "morning_reminder",
+    name: "תזכורת בוקר",
+    subject: "תזכורת בוקר — TruCare",
+    body: "<p>בוקר טוב {{firstName}},</p><p>זו תזכורת ליטול את מנת הבוקר בשעה {{time}}.</p>",
+    enabled: true,
+    updatedAt: subDays(now(), 5).toISOString(),
+  },
+  {
+    id: uid(),
+    key: "evening_reminder",
+    name: "תזכורת ערב",
+    subject: "תזכורת ערב — TruCare",
+    body: "<p>ערב טוב {{firstName}},</p><p>נא ליטול את מנת הערב בשעה {{time}}.</p>",
+    enabled: true,
+    updatedAt: subDays(now(), 5).toISOString(),
+  },
+  {
+    id: uid(),
+    key: "missed_dose",
+    name: "מנה שהוחמצה",
+    subject: "תזכורת: מנה שהוחמצה",
+    body: "<p>{{firstName}}, שמנו לב שטרם סימנת נטילת מנה היום. אנא עדכן/י ביומן.</p>",
+    enabled: true,
+    updatedAt: subDays(now(), 3).toISOString(),
+  },
+  {
+    id: uid(),
+    key: "start_treatment",
+    name: "התחלת טיפול",
+    subject: "התחלת טיפול בטרוקאפ",
+    body: "<p>שלום {{firstName}},</p><p>זה היום שלך להתחיל את הטיפול בטרוקאפ. יש לפעול לפי הוראות הרופא המטפל והעלון לצרכן.</p>",
+    enabled: true,
+    updatedAt: subDays(now(), 2).toISOString(),
+  },
+  {
+    id: uid(),
+    key: "day_off",
+    name: "יום הפסקה",
+    subject: "יום הפסקה — TruCare",
+    body: "<p>שלום {{firstName}},</p><p>היום יום הפסקה ואין ליטול את הטיפול. יש לפעול לפי הוראות הרופא.</p>",
+    enabled: true,
+    updatedAt: subDays(now(), 2).toISOString(),
+  },
+  {
+    id: uid(),
+    key: "otp_code",
+    name: "קוד אימות",
+    subject: "קוד האימות שלך ל-TruCare",
+    body: "<p>קוד האימות שלך ל-TruCare: <strong>{{code}}</strong>.</p><p>הקוד תקף ל-5 דקות.</p>",
+    enabled: true,
+    updatedAt: subDays(now(), 1).toISOString(),
+  },
+  {
+    id: uid(),
+    key: "custom",
+    name: "מותאם אישית",
+    subject: "",
+    body: "",
+    enabled: true,
+    updatedAt: subDays(now(), 0).toISOString(),
+  },
+];
+
 export const mockDb = {
   patients,
   plans,
@@ -178,6 +255,8 @@ export const mockDb = {
   incidents,
   apiSettings,
   smsConfigOverride,
+  smsTemplates,
+  emailTemplates,
 };
 
 export const mockApi = {
@@ -336,6 +415,52 @@ export const mockApi = {
     await latency(60, 120);
     const i = smsTemplates.findIndex((t) => t.id === id);
     if (i >= 0) smsTemplates.splice(i, 1);
+    return { ok: true };
+  },
+  async listEmailTemplates(): Promise<EmailTemplate[]> {
+    await latency();
+    return [...emailTemplates].sort((a, b) => a.name.localeCompare(b.name, "he"));
+  },
+  async getEmailTemplate(key: EmailTemplateKey): Promise<EmailTemplate | undefined> {
+    await latency(40, 80);
+    return emailTemplates.find((t) => t.key === key);
+  },
+  async upsertEmailTemplate(input: {
+    id?: string;
+    key: EmailTemplateKey;
+    name: string;
+    subject: string;
+    body: string;
+    enabled: boolean;
+  }): Promise<EmailTemplate> {
+    await latency();
+    const existing = input.id
+      ? emailTemplates.find((t) => t.id === input.id)
+      : emailTemplates.find((t) => t.key === input.key);
+    if (existing) {
+      existing.name = input.name;
+      existing.subject = input.subject;
+      existing.body = input.body;
+      existing.enabled = input.enabled;
+      existing.updatedAt = new Date().toISOString();
+      return existing;
+    }
+    const created: EmailTemplate = {
+      id: uid(),
+      key: input.key,
+      name: input.name,
+      subject: input.subject,
+      body: input.body,
+      enabled: input.enabled,
+      updatedAt: new Date().toISOString(),
+    };
+    emailTemplates.push(created);
+    return created;
+  },
+  async deleteEmailTemplate(id: string): Promise<{ ok: boolean }> {
+    await latency(60, 120);
+    const i = emailTemplates.findIndex((t) => t.id === id);
+    if (i >= 0) emailTemplates.splice(i, 1);
     return { ok: true };
   },
   // small helpers

@@ -66,3 +66,56 @@ ON DUPLICATE KEY UPDATE
   body = VALUES(body),
   enabled = VALUES(enabled),
   updated_at = CURRENT_TIMESTAMP(3);
+
+-- ---------------------------------------------------------------------------
+-- Default email templates
+-- Variables supported: {{firstName}}, {{code}}, {{time}}
+-- ---------------------------------------------------------------------------
+INSERT INTO email_templates (id, key_name, name, subject, body, enabled, updated_at) VALUES
+  ('01J8TMPL0000000000001WELM', 'welcome',
+   'ברוכים הבאים',
+   'ברוכים הבאים ל-TruCare',
+   '<p>שלום {{firstName}},</p><p>ברוך/ה הבא/ה ל-TruCare. נלווה אותך לאורך הטיפול.</p>',
+   1, CURRENT_TIMESTAMP(3)),
+
+  ('01J8TMPL0000000000001MORM', 'morning_reminder',
+   'תזכורת בוקר',
+   'תזכורת בוקר — TruCare',
+   '<p>בוקר טוב {{firstName}},</p><p>זו תזכורת ליטול את מנת הבוקר בשעה {{time}}.</p>',
+   1, CURRENT_TIMESTAMP(3)),
+
+  ('01J8TMPL0000000000001EVEM', 'evening_reminder',
+   'תזכורת ערב',
+   'תזכורת ערב — TruCare',
+   '<p>ערב טוב {{firstName}},</p><p>נא ליטול את מנת הערב בשעה {{time}}.</p>',
+   1, CURRENT_TIMESTAMP(3)),
+
+  ('01J8TMPL0000000000001STRM', 'start_treatment',
+   'התחלת טיפול',
+   'התחלת טיפול בטרוקאפ',
+   '<p>שלום {{firstName}},</p><p>זה היום שלך להתחיל את הטיפול בטרוקאפ. יש לפעול לפי הוראות הרופא המטפל והעלון לצרכן.</p>',
+   1, CURRENT_TIMESTAMP(3)),
+
+  ('01J8TMPL0000000000001DAYM', 'day_off',
+   'יום הפסקה',
+   'יום הפסקה — TruCare',
+   '<p>שלום {{firstName}},</p><p>היום יום הפסקה ואין ליטול את הטיפול. יש לפעול לפי הוראות הרופא.</p>',
+   1, CURRENT_TIMESTAMP(3)),
+
+  ('01J8TMPL0000000000001MISM', 'missed_dose',
+   'מנה שהוחמצה',
+   'תזכורת: מנה שהוחמצה',
+   '<p>{{firstName}}, שמנו לב שטרם סימנת נטילת מנה היום. אנא עדכן/י ביומן.</p>',
+   1, CURRENT_TIMESTAMP(3)),
+
+  ('01J8TMPL0000000000001OTPM', 'otp_code',
+   'קוד אימות',
+   'קוד האימות שלך ל-TruCare',
+   '<p>קוד האימות שלך ל-TruCare: <strong>{{code}}</strong>.</p><p>הקוד תקף ל-5 דקות.</p>',
+   1, CURRENT_TIMESTAMP(3))
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  subject = VALUES(subject),
+  body = VALUES(body),
+  enabled = VALUES(enabled),
+  updated_at = CURRENT_TIMESTAMP(3);

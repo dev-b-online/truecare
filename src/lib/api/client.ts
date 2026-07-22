@@ -6,6 +6,8 @@ import type {
   ApiSettings,
   ConsentRecord,
   DoseEvent,
+  EmailTemplate,
+  EmailTemplateKey,
   IncidentLog,
   NotificationLog,
   Patient,
@@ -246,6 +248,50 @@ export const realApi = {
     return req(`/admin/sms/templates/${id}`, { method: "DELETE" });
   },
 
+  // ── Email templates ───────────────────────────────────────────
+  async listEmailTemplates(): Promise<EmailTemplate[]> {
+    const res = await req<{ items: EmailTemplate[] }>("/admin/email/templates");
+    return res.items ?? [];
+  },
+  async getEmailTemplate(key: EmailTemplateKey): Promise<EmailTemplate | undefined> {
+    return req(`/admin/email/templates/${key}`);
+  },
+  async upsertEmailTemplate(input: {
+    id?: string;
+    key: EmailTemplateKey;
+    name: string;
+    subject: string;
+    body: string;
+    enabled: boolean;
+  }): Promise<EmailTemplate> {
+    if (input.id) {
+      const res = await req<{ template: EmailTemplate }>(`/admin/email/templates/${input.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          name: input.name,
+          subject: input.subject,
+          body: input.body,
+          enabled: input.enabled,
+        }),
+      });
+      return res.template;
+    }
+    const res = await req<{ template: EmailTemplate }>("/admin/email/templates", {
+      method: "POST",
+      body: JSON.stringify({
+        key: input.key,
+        name: input.name,
+        subject: input.subject,
+        body: input.body,
+        enabled: input.enabled,
+      }),
+    });
+    return res.template;
+  },
+  async deleteEmailTemplate(id: string): Promise<{ ok: boolean }> {
+    return req(`/admin/email/templates/${id}`, { method: "DELETE" });
+  },
+
   // ── SMS test send ────────────────────────────────────────────
   async sendSmsTest(recipient: string): Promise<{ ok: boolean; providerCode: number }> {
     return req("/admin/sms/test", {
@@ -257,7 +303,7 @@ export const realApi = {
   // ── OTP auth ─────────────────────────────────────────────────
   // OTP endpoints are unauthenticated. Send no token so a stale/admin token
   // can never leak into the login flow.
-  async requestOtp(phone: string): Promise<{
+  async requestOtp(recipient: string): Promise<{
     challengeId: string;
     expiresAt: string;
     resendAvailableIn: number;
@@ -267,7 +313,7 @@ export const realApi = {
       "/auth/otp/request",
       {
         method: "POST",
-        body: JSON.stringify({ recipient: phone }),
+        body: JSON.stringify({ recipient }),
       },
       "none",
     );
@@ -286,13 +332,13 @@ export const realApi = {
     );
   },
   async resendOtp(
-    phone: string,
+    recipient: string,
   ): Promise<{ challengeId: string; expiresAt: string; resendAvailableIn: number }> {
     return req(
       "/auth/otp/resend",
       {
         method: "POST",
-        body: JSON.stringify({ recipient: phone }),
+        body: JSON.stringify({ recipient }),
       },
       "none",
     );
@@ -308,10 +354,10 @@ export const realApi = {
     );
   },
   async getRateLimit(
-    phone: string,
+    recipient: string,
   ): Promise<{ remaining: number; max: number; windowSec: number }> {
     return req<{ remaining: number; max: number; windowSec: number }>(
-      `/auth/otp/rate-limit?recipient=${encodeURIComponent(phone)}`,
+      `/auth/otp/rate-limit?recipient=${encodeURIComponent(recipient)}`,
       {},
       "none",
     );

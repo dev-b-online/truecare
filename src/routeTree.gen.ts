@@ -25,6 +25,7 @@ import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminIncidentsRouteImport } from './routes/admin.incidents'
+import { Route as AdminEmailTemplatesRouteImport } from './routes/admin.email-templates'
 
 const VerifyOtpRoute = VerifyOtpRouteImport.update({
   id: '/verify-otp',
@@ -106,6 +107,11 @@ const AdminIncidentsRoute = AdminIncidentsRouteImport.update({
   path: '/incidents',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminEmailTemplatesRoute = AdminEmailTemplatesRouteImport.update({
+  id: '/email-templates',
+  path: '/email-templates',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/terms-of-use': typeof TermsOfUseRoute
   '/verify-otp': typeof VerifyOtpRoute
+  '/admin/email-templates': typeof AdminEmailTemplatesRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/terms-of-use': typeof TermsOfUseRoute
   '/verify-otp': typeof VerifyOtpRoute
+  '/admin/email-templates': typeof AdminEmailTemplatesRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/terms-of-use': typeof TermsOfUseRoute
   '/verify-otp': typeof VerifyOtpRoute
+  '/admin/email-templates': typeof AdminEmailTemplatesRoute
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/terms-of-use'
     | '/verify-otp'
+    | '/admin/email-templates'
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/notifications'
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/terms-of-use'
     | '/verify-otp'
+    | '/admin/email-templates'
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/notifications'
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/terms-of-use'
     | '/verify-otp'
+    | '/admin/email-templates'
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/notifications'
@@ -346,10 +358,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIncidentsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/email-templates': {
+      id: '/admin/email-templates'
+      path: '/email-templates'
+      fullPath: '/admin/email-templates'
+      preLoaderRoute: typeof AdminEmailTemplatesRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminEmailTemplatesRoute: typeof AdminEmailTemplatesRoute
   AdminIncidentsRoute: typeof AdminIncidentsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
@@ -359,6 +379,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminEmailTemplatesRoute: AdminEmailTemplatesRoute,
   AdminIncidentsRoute: AdminIncidentsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,

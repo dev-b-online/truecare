@@ -472,6 +472,80 @@ paths:
                   providerCode: { type: integer }
         "502": { $ref: "#/components/responses/SmsProviderError" }
 
+  /admin/email/templates:
+    get:
+      tags: [AdminEmail]
+      summary: List email templates
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/EmailTemplate" }
+    post:
+      tags: [AdminEmail]
+      summary: Create email template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmailTemplateInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  template: { $ref: "#/components/schemas/EmailTemplate" }
+
+  /admin/email/templates/{id}:
+    patch:
+      tags: [AdminEmail]
+      summary: Update email template
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmailTemplateInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  template: { $ref: "#/components/schemas/EmailTemplate" }
+    delete:
+      tags: [AdminEmail]
+      summary: Delete email template
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -586,6 +660,32 @@ components:
         key: { $ref: "#/components/schemas/SmsTemplateKey" }
         name: { type: string, maxLength: 120 }
         body: { type: string, maxLength: 480 }
+        enabled: { type: boolean }
+
+    EmailTemplateKey:
+      type: string
+      enum: [welcome, morning_reminder, evening_reminder, missed_dose, otp_code, custom, start_treatment, day_off]
+
+    EmailTemplate:
+      type: object
+      properties:
+        id: { type: string }
+        key: { $ref: "#/components/schemas/EmailTemplateKey" }
+        name: { type: string }
+        subject: { type: string, maxLength: 180 }
+        body: { type: string, maxLength: 5000 }
+        enabled: { type: boolean }
+        updatedAt: { type: string, format: date-time }
+        updatedBy: { type: string, nullable: true }
+
+    EmailTemplateInput:
+      type: object
+      required: [key, name, subject, body, enabled]
+      properties:
+        key: { $ref: "#/components/schemas/EmailTemplateKey" }
+        name: { type: string, maxLength: 120 }
+        subject: { type: string, maxLength: 180 }
+        body: { type: string, maxLength: 5000 }
         enabled: { type: boolean }
 
     SmsConfigView:

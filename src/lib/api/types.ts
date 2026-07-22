@@ -132,6 +132,19 @@ export interface SmsTemplate {
   updatedBy?: string;
 }
 
+export type EmailTemplateKey = SmsTemplateKey;
+
+export interface EmailTemplate {
+  id: string;
+  key: EmailTemplateKey;
+  name: string;
+  subject: string;
+  body: string; // supports {{firstName}}, {{code}}, {{time}}
+  enabled: boolean;
+  updatedAt: string;
+  updatedBy?: string;
+}
+
 export interface ApiSettings {
   baseUrl: string;
   useMock: boolean;
