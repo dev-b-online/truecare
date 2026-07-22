@@ -131,9 +131,25 @@ const smsTemplates: SmsTemplate[] = [
     id: uid(),
     key: "missed_dose",
     name: "מנה שהוחמצה",
-    body: "{{firstName}}, שמנו לב שטרם סימנת נטילת מנה היום. אנא עדכן/י ביומן.",
+    body: "{{firstName}}, שמנו לב שטרם סימנת נטילת מנה היום. אנא עדכן/י היומן.",
     enabled: true,
     updatedAt: subDays(now(), 3).toISOString(),
+  },
+  {
+    id: uid(),
+    key: "start_treatment",
+    name: "התחלת טיפול",
+    body: "שלום {{firstName}}, זה היום שלך להתחיל את הטיפול בטרוקאפ. יש לפעול לפי הוראות הרופא המטפל והעלון לצרכן.",
+    enabled: true,
+    updatedAt: subDays(now(), 2).toISOString(),
+  },
+  {
+    id: uid(),
+    key: "day_off",
+    name: "יום הפסקה",
+    body: "שלום {{firstName}}, היום יום הפסקה ואין ליטול את הטיפול. יש לפעול לפי הוראות הרופא.",
+    enabled: true,
+    updatedAt: subDays(now(), 2).toISOString(),
   },
   {
     id: uid(),
@@ -142,6 +158,14 @@ const smsTemplates: SmsTemplate[] = [
     body: "קוד האימות שלך ל-TruCare: {{code}}. הקוד תקף ל-5 דקות.",
     enabled: true,
     updatedAt: subDays(now(), 1).toISOString(),
+  },
+  {
+    id: uid(),
+    key: "custom",
+    name: "מותאם אישית",
+    body: "",
+    enabled: true,
+    updatedAt: subDays(now(), 0).toISOString(),
   },
 ];
 

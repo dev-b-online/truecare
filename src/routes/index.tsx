@@ -1,11 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
-import { ConfirmResetModal } from "@/components/ConfirmResetModal";
-import { useState } from "react";
-import { api } from "@/lib/api";
-import { toast } from "sonner";
-import { useOnboarding } from "@/state/onboardingStore";
 
 export const Route = createFileRoute("/")({
   component: WelcomeRoute,
@@ -21,8 +16,6 @@ export const Route = createFileRoute("/")({
 });
 
 function WelcomeRoute() {
-  const [resetOpen, setResetOpen] = useState(false);
-  const clearOnboarding = useOnboarding((s) => s.clear);
   return (
     <PageShell>
       <div className="mt-4 flex flex-col items-center gap-6 text-center">
@@ -46,25 +39,8 @@ function WelcomeRoute() {
           <Button asChild variant="outline" className="h-12 rounded-full text-base">
             <Link to="/diary">כניסה ליומן הדגמה</Link>
           </Button>
-          <Button
-            variant="ghost"
-            className="h-11 rounded-full text-sm text-muted-foreground"
-            onClick={() => setResetOpen(true)}
-          >
-            איפוס הנתונים המקומיים
-          </Button>
         </div>
       </div>
-      <ConfirmResetModal
-        open={resetOpen}
-        onOpenChange={setResetOpen}
-        onConfirm={() => {
-          clearOnboarding();
-          api.wipeAll();
-          if (typeof sessionStorage !== "undefined") sessionStorage.clear();
-          toast.success("הנתונים נמחקו");
-        }}
-      />
     </PageShell>
   );
 }

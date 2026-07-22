@@ -566,7 +566,7 @@ components:
 
     SmsTemplateKey:
       type: string
-      enum: [welcome, morning_reminder, evening_reminder, missed_dose, otp_code, custom]
+      enum: [welcome, morning_reminder, evening_reminder, missed_dose, otp_code, custom, start_treatment, day_off]
 
     SmsTemplate:
       type: object

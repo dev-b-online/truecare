@@ -47,6 +47,16 @@ INSERT INTO sms_templates (id, key_name, name, body, enabled, updated_at) VALUES
    '{{firstName}}, שמנו לב שטרם סימנת נטילת מנה היום. אנא עדכן/י ביומן.',
    1, CURRENT_TIMESTAMP(3)),
 
+  ('01J8TMPL0000000000000STRT', 'start_treatment',
+   'התחלת טיפול',
+   'שלום {{firstName}}, זה היום שלך להתחיל את הטיפול בטרוקאפ. יש לפעול לפי הוראות הרופא המטפל והעלון לצרכן.',
+   1, CURRENT_TIMESTAMP(3)),
+
+  ('01J8TMPL0000000000000DAYOF', 'day_off',
+   'יום הפסקה',
+   'שלום {{firstName}}, היום יום הפסקה ואין ליטול את הטיפול. יש לפעול לפי הוראות הרופא.',
+   1, CURRENT_TIMESTAMP(3)),
+
   ('01J8TMPL0000000000000OTPC', 'otp_code',
    'קוד אימות',
    'קוד האימות שלך ל-TruCare: {{code}}. הקוד תקף ל-5 דקות.',

@@ -113,7 +113,14 @@ export interface OtpVerifyResult {
 }
 
 export type SmsTemplateKey =
-  "welcome" | "morning_reminder" | "evening_reminder" | "missed_dose" | "otp_code" | "custom";
+  | "welcome"
+  | "morning_reminder"
+  | "evening_reminder"
+  | "missed_dose"
+  | "otp_code"
+  | "custom"
+  | "start_treatment"
+  | "day_off";
 
 export interface SmsTemplate {
   id: string;

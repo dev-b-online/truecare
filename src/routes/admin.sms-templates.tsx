@@ -36,6 +36,8 @@ const TEMPLATE_KEYS: { value: SmsTemplateKey; label: string }[] = [
   { value: "welcome", label: "ברוכים הבאים" },
   { value: "morning_reminder", label: "תזכורת בוקר" },
   { value: "evening_reminder", label: "תזכורת ערב" },
+  { value: "day_off", label: "יום הפסקה" },
+  { value: "start_treatment", label: "התחלת טיפול" },
   { value: "missed_dose", label: "מנה שהוחמצה" },
   { value: "otp_code", label: "קוד אימות" },
   { value: "custom", label: "מותאם אישית" },

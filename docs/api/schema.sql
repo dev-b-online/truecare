@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE TABLE IF NOT EXISTS sms_templates (
   id             CHAR(26)     NOT NULL,
   key_name       ENUM('welcome','morning_reminder','evening_reminder',
-                      'missed_dose','otp_code','custom') NOT NULL,
+                      'missed_dose','otp_code','custom','start_treatment','day_off') NOT NULL,
   -- Persistent generated column: NULL for 'custom' rows (allows many),
   -- equal to key_name otherwise (enforces uniqueness via the index below).
   -- MariaDB 10.3 supports PERSISTENT generated columns; MySQL 8 users can
@@ -249,4 +249,18 @@ CREATE TABLE IF NOT EXISTS app_settings (
 --   DELETE FROM otp_challenges WHERE expires_at  < NOW() - INTERVAL 1 DAY;
 --   DELETE FROM sessions       WHERE expires_at  < NOW() OR revoked_at IS NOT NULL;
 -- ---------------------------------------------------------------------------
+-- 13) reminder_logs — avoids sending duplicate daily reminders
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS reminder_logs (
+  id             CHAR(26)     NOT NULL,
+  patient_id     CHAR(26)     NOT NULL,
+  plan_id        CHAR(26)     NOT NULL,
+  template_key   VARCHAR(60)  NOT NULL,
+  scheduled_date DATE         NOT NULL,
+  sent_at        DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  status         ENUM('sent','failed') NOT NULL DEFAULT 'sent',
+  PRIMARY KEY (id),
+  KEY idx_reminder_patient_date (patient_id, scheduled_date),
+  KEY idx_reminder_plan_date (plan_id, scheduled_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
