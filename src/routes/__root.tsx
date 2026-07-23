@@ -70,37 +70,57 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "TruCare – יומן טיפול דיגיטלי" },
-      {
-        name: "description",
-        content:
-          "TruCare – יומן דיגיטלי למטופלי Truqap. מעקב מנות, תזכורות SMS ודיווח תופעות בעברית.",
-      },
-      { name: "author", content: "TruCare" },
-      { property: "og:title", content: "TruCare – יומן טיפול דיגיטלי" },
-      {
-        property: "og:description",
-        content:
-          "יומן טיפול דיגיטלי בעברית עבור מטופלי Truqap: מעקב מנות בוקר וערב, תזכורות ודיווח.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Rubik:wght@400;500;600;700&display=swap",
-      },
-    ],
-  }),
+  head: () => {
+    const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { title: "TruCare – יומן טיפול דיגיטלי" },
+        {
+          name: "description",
+          content:
+            "TruCare – יומן דיגיטלי למטופלי Truqap. מעקב מנות, תזכורות SMS ודיווח תופעות בעברית.",
+        },
+        { name: "author", content: "TruCare" },
+        { property: "og:title", content: "TruCare – יומן טיפול דיגיטלי" },
+        {
+          property: "og:description",
+          content:
+            "יומן טיפול דיגיטלי בעברית עבור מטופלי Truqap: מעקב מנות בוקר וערב, תזכורות ודיווח.",
+        },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [
+        { rel: "stylesheet", href: appCss },
+        { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&family=Rubik:wght@400;500;600;700&display=swap",
+        },
+      ],
+      scripts:
+        gaId && gaId !== "G-XXXXXXXXXX"
+          ? [
+              {
+                src: `https://www.googletagmanager.com/gtag/js?id=${gaId}`,
+                async: true,
+              } as React.JSX.IntrinsicElements["script"],
+              {
+                children: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){window.dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${gaId}', { anonymize_ip: true });
+              `,
+              } as React.JSX.IntrinsicElements["script"],
+            ]
+          : [],
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

@@ -7,6 +7,7 @@ import { parseISO, addDays, format, startOfMonth } from "date-fns";
 import { useDiary } from "@/state/diaryStore";
 import { DayCard } from "@/components/diary/DayCard";
 import { ResetCycleModal } from "@/components/ResetCycleModal";
+import { WeekGrid } from "@/components/diary/WeekGrid";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { HEBREW_MONTHS } from "@/lib/calendar";
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/diary")({
   head: () => ({ meta: [{ title: "היומן שלי | TruCare" }] }),
   beforeLoad: () => {
     if (typeof window !== "undefined" && !localStorage.getItem(PATIENT_TOKEN_KEY)) {
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/diary-demo" });
     }
   },
 });
@@ -142,34 +143,5 @@ function DiaryRoute() {
         onConfirm={onReset}
       />
     </PageShell>
-  );
-}
-
-function WeekGrid({
-  title,
-  cells,
-  onMark,
-  startDate,
-}: {
-  title: string;
-  cells: ReturnType<typeof buildTwoWeekGrid>;
-  onMark: (id: string, s: "taken" | "missed") => void;
-  startDate: string;
-}) {
-  void startDate;
-  return (
-    <section className="rounded-2xl border border-hair bg-card p-3">
-      <div className="mb-2 flex items-center justify-between px-1">
-        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-        <span className="text-[11px] text-muted-foreground">
-          {cells[0] && `${format(cells[0].date, "dd/MM")} – ${format(cells[6].date, "dd/MM")}`}
-        </span>
-      </div>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-4 lg:grid-cols-7">
-        {cells.map((c) => (
-          <DayCard key={c.iso} cell={c} onMark={onMark} />
-        ))}
-      </div>
-    </section>
   );
 }

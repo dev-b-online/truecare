@@ -15,6 +15,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as InstructionsRouteImport } from './routes/instructions'
+import { Route as DiaryDemoRouteImport } from './routes/diary-demo'
 import { Route as DiaryRouteImport } from './routes/diary'
 import { Route as ConsentRouteImport } from './routes/consent'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -55,6 +56,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const InstructionsRoute = InstructionsRouteImport.update({
   id: '/instructions',
   path: '/instructions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiaryDemoRoute = DiaryDemoRouteImport.update({
+  id: '/diary-demo',
+  path: '/diary-demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiaryRoute = DiaryRouteImport.update({
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/consent': typeof ConsentRoute
   '/diary': typeof DiaryRoute
+  '/diary-demo': typeof DiaryDemoRoute
   '/instructions': typeof InstructionsRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/consent': typeof ConsentRoute
   '/diary': typeof DiaryRoute
+  '/diary-demo': typeof DiaryDemoRoute
   '/instructions': typeof InstructionsRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/consent': typeof ConsentRoute
   '/diary': typeof DiaryRoute
+  '/diary-demo': typeof DiaryDemoRoute
   '/instructions': typeof InstructionsRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/consent'
     | '/diary'
+    | '/diary-demo'
     | '/instructions'
     | '/onboarding'
     | '/privacy-policy'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/consent'
     | '/diary'
+    | '/diary-demo'
     | '/instructions'
     | '/onboarding'
     | '/privacy-policy'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/consent'
     | '/diary'
+    | '/diary-demo'
     | '/instructions'
     | '/onboarding'
     | '/privacy-policy'
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ConsentRoute: typeof ConsentRoute
   DiaryRoute: typeof DiaryRoute
+  DiaryDemoRoute: typeof DiaryDemoRoute
   InstructionsRoute: typeof InstructionsRoute
   OnboardingRoute: typeof OnboardingRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
@@ -286,6 +299,13 @@ declare module '@tanstack/react-router' {
       path: '/instructions'
       fullPath: '/instructions'
       preLoaderRoute: typeof InstructionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diary-demo': {
+      id: '/diary-demo'
+      path: '/diary-demo'
+      fullPath: '/diary-demo'
+      preLoaderRoute: typeof DiaryDemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/diary': {
@@ -395,6 +415,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   ConsentRoute: ConsentRoute,
   DiaryRoute: DiaryRoute,
+  DiaryDemoRoute: DiaryDemoRoute,
   InstructionsRoute: InstructionsRoute,
   OnboardingRoute: OnboardingRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,

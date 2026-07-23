@@ -37,7 +37,7 @@ function WelcomeRoute() {
             <Link to="/onboarding">התחלת רישום</Link>
           </Button>
           <Button asChild variant="outline" className="h-12 rounded-full text-base">
-            <Link to="/diary">כניסה ליומן הדגמה</Link>
+            <Link to="/diary-demo">כניסה ליומן הדגמה</Link>
           </Button>
         </div>
       </div>

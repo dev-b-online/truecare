@@ -90,8 +90,12 @@ export function PageShell({ children, className, hideHeader, wide }: PageShellPr
             className="h-12 w-auto object-contain"
           />
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <Link to="/terms-of-use" className="hover:text-foreground">תנאי שימוש</Link>
-            <Link to="/privacy-policy" className="hover:text-foreground">מדיניות פרטיות</Link>
+            <Link to="/terms-of-use" className="hover:text-foreground">
+              תנאי שימוש
+            </Link>
+            <Link to="/privacy-policy" className="hover:text-foreground">
+              מדיניות פרטיות
+            </Link>
             <span>POWERED BY B-ONLINE</span>
           </div>
         </div>

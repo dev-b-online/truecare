@@ -1,4 +1,3 @@
-import { redirect } from "@tanstack/react-router";
 import { api } from "@/lib/api";
 
 const ADMIN_TOKEN_KEY = "trucare.admin.session";
@@ -8,13 +7,12 @@ export async function adminBeforeLoad() {
 
   const token = localStorage.getItem(ADMIN_TOKEN_KEY);
   if (!token) {
-    throw redirect({ to: "/admin/login" });
+    return;
   }
 
   try {
     await api.getStats();
   } catch {
     localStorage.removeItem(ADMIN_TOKEN_KEY);
-    throw redirect({ to: "/admin/login" });
   }
 }

@@ -1,34 +1,14 @@
-import {
-  createFileRoute,
-  Outlet,
-  useRouterState,
-  useNavigate,
-  redirect,
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminLoginModal } from "@/components/admin/AdminLoginModal";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 
 const ADMIN_TOKEN_KEY = "trucare.admin.session";
 
 export const Route = createFileRoute("/admin")({
-  beforeLoad: async () => {
-    if (typeof window === "undefined") return;
-
-    const token = localStorage.getItem(ADMIN_TOKEN_KEY);
-    if (!token) {
-      throw redirect({ to: "/admin/login" });
-    }
-
-    try {
-      await api.getStats();
-    } catch {
-      localStorage.removeItem(ADMIN_TOKEN_KEY);
-      throw redirect({ to: "/admin/login" });
-    }
-  },
   component: AdminRoute,
 });
 
@@ -36,25 +16,84 @@ function AdminRoute() {
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const isRoot = path === "/admin";
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const checkAuth = async () => {
+      const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+      if (!token) {
+        setAuthenticated(false);
+        setLoginModalOpen(true);
+        return;
+      }
+
+      try {
+        await api.getStats();
+        setAuthenticated(true);
+      } catch {
+        localStorage.removeItem(ADMIN_TOKEN_KEY);
+        setAuthenticated(false);
+        setLoginModalOpen(true);
+      }
+    };
+
+    void checkAuth();
+  }, [navigate]);
 
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail?.status === 401) {
         localStorage.removeItem(ADMIN_TOKEN_KEY);
-        navigate({ to: "/admin/login" });
+        setAuthenticated(false);
+        setLoginModalOpen(true);
       }
     };
     window.addEventListener("trucare:api:unauthorized", handler);
     return () => window.removeEventListener("trucare:api:unauthorized", handler);
-  }, [navigate]);
+  }, []);
+
+  const handleLoginSuccess = () => {
+    setAuthenticated(true);
+    setLoginModalOpen(false);
+  };
+
+  if (authenticated === null) {
+    return (
+      <PageShell wide>
+        <div className="flex items-center justify-center py-20">
+          <div className="text-sm text-muted-foreground">טוען...</div>
+        </div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell wide>
       <div className="flex flex-col gap-4 sm:flex-row-reverse">
-        <AdminSidebar />
-        <div className="flex-1">{isRoot ? <AdminDashboard /> : <Outlet />}</div>
+        {authenticated && <AdminSidebar />}
+        <div className="flex-1">
+          {authenticated ? (
+            isRoot ? (
+              <AdminDashboard />
+            ) : (
+              <Outlet />
+            )
+          ) : (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-sm text-muted-foreground">נא להתחבר כדי לצפות בעמוד זה</div>
+            </div>
+          )}
+        </div>
       </div>
+      <AdminLoginModal
+        open={loginModalOpen}
+        onOpenChange={setLoginModalOpen}
+        onSuccess={handleLoginSuccess}
+      />
     </PageShell>
   );
 }
