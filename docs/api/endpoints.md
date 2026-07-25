@@ -302,3 +302,142 @@ Request: { "recipient": "0501234567", "templateKey": "morning_reminder" }
 200:     { "ok": true, "providerCode": 1 }
 502:     { "error": { "code": "SMS_PROVIDER_ERROR", "message": "provider error -3" } }
 ```
+
+### `GET /admin/patients`
+
+```json
+200:
+{
+  "items": [
+    {
+      "id": "01J8P...",
+      "firstName": "יעל",
+      "phoneMasked": "050****567",
+      "emailMasked": "ya***@example.com",
+      "channel": "sms",
+      "startDate": "2026-07-05",
+      "reminders": "on",
+      "createdAt": "2026-07-05T10:00:00Z"
+    }
+  ]
+}
+```
+
+### `GET /admin/patients/{id}/notifications`
+
+```json
+200:
+{
+  "patient": {
+    "id": "01J8P...",
+    "firstName": "יעל",
+    "startDate": "2026-07-05"
+  },
+  "plan": {
+    "id": "01J8PL...",
+    "startDate": "2026-07-05",
+    "cycleLengthDays": 7,
+    "treatmentDays": 4,
+    "breakDays": 3,
+    "createdAt": "2026-07-05T10:00:00Z"
+  },
+  "notifications": [
+    {
+      "id": "01J8N...",
+      "planId": "01J8PL...",
+      "template": "start_treatment",
+      "date": "2026-07-05",
+      "status": "sent",
+      "sentAt": "2026-07-05T08:05:00Z"
+    }
+  ]
+}
+```
+
+### `GET /admin/me`
+
+```json
+200:
+{
+  "id": "01J8A...",
+  "email": "admin@trucare.local",
+  "name": "Admin"
+}
+```
+
+### `GET /admin/smtp/config`
+
+```json
+200:
+{
+  "host": "smtp.sendgrid.net",
+  "port": 587,
+  "secure": "tls",
+  "user": "apikey",
+  "passMasked": "SG.****",
+  "providerConfigured": true,
+  "source": "db"
+}
+```
+
+### `PUT /admin/smtp/config`
+
+```json
+Request:
+{
+  "host": "smtp.mailtrap.io",
+  "port": 2525,
+  "secure": "tls",
+  "user": "user",
+  "pass": "pass"
+}
+200: { "ok": true, "saved": ["host", "port", "secure", "user", "pass"] }
+```
+
+### `POST /admin/smtp/test`
+
+```json
+Request: { "to": "dev@example.com" }
+200: { "ok": true, "providerCode": 250 }
+502: { "error": { "code": "SMTP_PROVIDER_ERROR", "message": "..." } }
+```
+
+### `GET /admin/email/templates`
+
+```json
+200:
+{
+  "items": [
+    {
+      "id": "01J8T...",
+      "key": "start_treatment",
+      "name": "התחלת טיפול",
+      "subject": "התחלת טיפול — TruCare",
+      "body": "<p>היי {{firstName}}, היום אתה מתחיל לקחת תרופה...</p>",
+      "enabled": true,
+      "updatedAt": "2026-07-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+### `POST /admin/email/templates`
+
+```json
+Request:
+{ "key": "custom", "name": "מבצע קיץ", "subject": "מבצע!", "body": "<p>שלום {{firstName}}...</p>", "enabled": true }
+201: { "template": { ...כמו למעלה... } }
+```
+
+### `PATCH /admin/email/templates/{id}`
+
+```json
+Request: { "name": "...", "subject": "...", "body": "...", "enabled": false }
+200:     { "template": { ... } }
+```
+
+### `DELETE /admin/email/templates/{id}`
+
+```json
+200: { "ok": true }
+```

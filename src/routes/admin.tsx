@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminLoginModal } from "@/components/admin/AdminLoginModal";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useState, useEffect } from "react";
@@ -16,6 +17,7 @@ function AdminRoute() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const isRoot = path === "/admin";
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -24,6 +26,7 @@ function AdminRoute() {
       const token = localStorage.getItem(ADMIN_TOKEN_KEY);
       if (!token) {
         setAuthenticated(false);
+        setLoginModalOpen(true);
         return;
       }
 
@@ -33,6 +36,7 @@ function AdminRoute() {
       } catch {
         localStorage.removeItem(ADMIN_TOKEN_KEY);
         setAuthenticated(false);
+        setLoginModalOpen(true);
       }
     };
 
@@ -45,11 +49,18 @@ function AdminRoute() {
       if (detail?.status === 401) {
         localStorage.removeItem(ADMIN_TOKEN_KEY);
         setAuthenticated(false);
+        setLoginModalOpen(true);
       }
     };
     window.addEventListener("trucare:api:unauthorized", handler);
     return () => window.removeEventListener("trucare:api:unauthorized", handler);
   }, []);
+
+  const handleLoginSuccess = () => {
+    setAuthenticated(true);
+    setLoginModalOpen(false);
+    navigate({ to: "/admin" });
+  };
 
   if (authenticated === null) {
     return (
@@ -79,6 +90,11 @@ function AdminRoute() {
           )}
         </div>
       </div>
+      <AdminLoginModal
+        open={loginModalOpen}
+        onOpenChange={setLoginModalOpen}
+        onSuccess={handleLoginSuccess}
+      />
     </PageShell>
   );
 }

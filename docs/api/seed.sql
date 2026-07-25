@@ -49,7 +49,12 @@ INSERT INTO sms_templates (id, key_name, name, body, enabled, updated_at) VALUES
 
   ('01J8TMPL0000000000000STRT', 'start_treatment',
    'התחלת טיפול',
-   'שלום {{firstName}}, זה היום שלך להתחיל את הטיפול בטרוקאפ. יש לפעול לפי הוראות הרופא המטפל והעלון לצרכן.',
+   'שלום {{firstName}}, היום אתה מתחיל לקחת תרופה! ב-4 הימים הקרובים תטול מנת בוקר ומנת ערב. אל תשכח!',
+   1, CURRENT_TIMESTAMP(3)),
+
+  ('01J8TMPL0000000000000PREB', 'pre_break',
+   'תזכורת לפני הפסקה',
+   '{{firstName}}, מחר תקופת הפסקה של 3 ימים. מחר, מחרתיים ומחרתיים לא תצטרך לקחת תרופה.',
    1, CURRENT_TIMESTAMP(3)),
 
   ('01J8TMPL0000000000000DAYOF', 'day_off',
@@ -92,8 +97,14 @@ INSERT INTO email_templates (id, key_name, name, subject, body, enabled, updated
 
   ('01J8TMPL0000000000001STRM', 'start_treatment',
    'התחלת טיפול',
-   'התחלת טיפול בטרוקאפ',
-   '<p>שלום {{firstName}},</p><p>זה היום שלך להתחיל את הטיפול בטרוקאפ. יש לפעול לפי הוראות הרופא המטפל והעלון לצרכן.</p>',
+   'התחלת טיפול — TruCare',
+   '<p>שלום {{firstName}},</p><p>היום אתה מתחיל לקחת תרופה! ב-4 הימים הקרובים תטול מנת בוקר ומנת ערב.</p><p>אל תשכח לקחת את המנות בזמנן!</p>',
+   1, CURRENT_TIMESTAMP(3)),
+
+  ('01J8TMPL0000000000001PREB', 'pre_break',
+   'תזכורת לפני הפסקה',
+   'תזכורת לפני הפסקה — TruCare',
+   '<p>{{firstName}},</p><p>מחר מתחילה תקופת הפסקה של 3 ימים. ב-3 הימים הקרובים לא תצטרכו לקחת תרופה.</p>',
    1, CURRENT_TIMESTAMP(3)),
 
   ('01J8TMPL0000000000001DAYM', 'day_off',

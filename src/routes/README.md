@@ -19,3 +19,31 @@ is `src/routes/__root.tsx`.
 | `__root.tsx`             | app shell — wraps every page; preserve `<Outlet />`     |
 
 `routeTree.gen.ts` is auto-generated. Don't edit it by hand.
+
+## Admin routes
+
+| File                          | URL                                    |
+| ----------------------------- | -------------------------------------- |
+| `admin.tsx`                   | `/admin` (dashboard + layout)          |
+| `admin.patients.tsx`          | `/admin/patients` (список пациентов)   |
+| `admin.notifications.tsx`     | `/admin/notifications` (лог уведомлений) |
+| `admin.incidents.tsx`         | `/admin/incidents` (лог инцидентов)    |
+| `admin.sms-templates.tsx`     | `/admin/sms-templates` (SMS шаблоны)   |
+| `admin.email-templates.tsx`   | `/admin/email-templates` (Email шаблоны) |
+| `admin.sms-settings.tsx`      | `/admin/sms-settings` (настройки SMS)  |
+| `admin.smtp-settings.tsx`     | `/admin/smtp-settings` (настройки SMTP) |
+| `admin.settings.tsx`          | `/admin/settings` (API настройки)      |
+
+## Patient routes
+
+| File                          | URL                                    |
+| ----------------------------- | -------------------------------------- |
+| `index.tsx`                  | `/` (главная с кнопкой логина)         |
+| `register.tsx`               | `/register` (регистрация)              |
+| `verify-otp.tsx`             | `/verify-otp` (верификация OTP)        |
+| `onboarding.tsx`             | `/onboarding` (онбординг)               |
+| `instructions.tsx`           | `/instructions` (инструкции)            |
+| `diary.tsx`                  | `/diary` (дневник пациента)            |
+| `diary-demo.tsx`             | `/diary-demo` (демо-дневник)           |
+| `terms-of-use.tsx`           | `/terms-of-use`                        |
+| `privacy-policy.tsx`         | `/privacy-policy`                      |

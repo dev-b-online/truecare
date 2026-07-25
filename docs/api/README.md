@@ -57,9 +57,11 @@ Staging:     https://staging-api.trucare.example.com/v1
 
 ### מטופל
 
-1. `POST /auth/otp/request` עם טלפון → ה-PHP מייצר קוד 6 ספרות, שולח ב-SMS, מחזיר `challengeId`.
+1. `POST /auth/otp/request` עם טלפון **או email** → ה-PHP מייצר קוד 6 ספרות, שולח ב-SMS או email, מחזיר `challengeId`.
 2. `POST /auth/otp/verify` עם `challengeId` + `code` → מחזיר `sessionToken` (JWT).
 3. הפרונט שולח `Authorization: Bearer <sessionToken>` בכל בקשה.
+
+**כוון OTP универсальный:** если recipient содержит `@` → email-канал, иначе → SMS.
 
 ### אדמין
 
@@ -170,6 +172,8 @@ Access-Control-Max-Age: 86400
 | GET    | `/plans/{id}/doses`         | patient       |
 | PATCH  | `/doses/{id}`               | patient       |
 | GET    | `/admin/stats`              | admin         |
+| GET    | `/admin/patients`           | admin         |
+| GET    | `/admin/patients/{id}/notifications` | admin |
 | GET    | `/admin/notifications`      | admin         |
 | GET    | `/admin/incidents`          | admin         |
 | GET    | `/admin/sms/templates`      | admin         |
@@ -178,6 +182,14 @@ Access-Control-Max-Age: 86400
 | DELETE | `/admin/sms/templates/{id}` | admin         |
 | GET    | `/admin/sms/health`         | admin         |
 | POST   | `/admin/sms/test`           | admin         |
+| GET    | `/admin/smtp/config`        | admin         |
+| PUT    | `/admin/smtp/config`        | admin         |
+| POST   | `/admin/smtp/test`          | admin         |
+| GET    | `/admin/email/templates`    | admin         |
+| POST   | `/admin/email/templates`    | admin         |
+| PATCH  | `/admin/email/templates/{id}` | admin       |
+| DELETE | `/admin/email/templates/{id}` | admin       |
+| GET    | `/admin/me`                 | admin         |
 
 ## סדר עבודה מומלץ למפתח ה-PHP
 
@@ -188,3 +200,29 @@ Access-Control-Max-Age: 86400
 5. בדוק כל endpoint עם `postman.json`.
 6. הפעל את ה-CORS מול דומיין ה-Lovable של הפרויקט.
 7. מסור URL + טוקן בדיקה — הפרונט יגדיר אותם ב-`/admin/settings` ויכבה את ה-Mock.
+
+## מערכת התראות ואימייל
+
+### תבניות התראות
+
+| מפתח | מתי נשלח | תוכן |
+|-------|----------|-------|
+| `start_treatment` | יום 1 בבוקר (>= 08:00) | הודעת התחלת טיפול — 4 ימים רצופים |
+| `pre_break` | יום 4 בבוקר (>= 08:00) | תזכורת לפני הפסקה של 3 ימים |
+| `morning_reminder` | זמין, אך לא בשימוש כרגע | תזכורת בוקר |
+| `evening_reminder` | זמין, אך לא בשימוש כרגע | תזכורת ערב |
+| `day_off` | זמין, אך לא בשימוש כרגע | יום הפסקה |
+| `missed_dose` | זמין, אך לא בשימוש כרגע | מנה שהוחמצה |
+
+### לוגיקת שליחה
+
+- Cron רץ כל 5 דקות (`send_reminders.php`).
+- רק ימים 1 ו-4 במחזור של 7 ימים: יום 1 → `start_treatment`, יום 4 → `pre_break`.
+- כל הודעה נשלחת עם **3 ניסיונות** ו-30 שניות המתנה ביניהם.
+- אם כל הניסיונות נכשלו → שליחת email ל-`ADMIN_EMAIL` עם פרטי השגיאה.
+
+### SMTP
+
+- אם מוגדר `SMTP_HOST` ב-`.env` או ב-`app_settings` → שימוש ב-`SmtpMailer` (TLS/STARTTLS).
+- אחרת → fallback ל-`mail()`.
+- הגדרות SMTP נשמרות ב-`app_settings` (`smtp.host`, `smtp.port`, `smtp.secure`, `smtp.user`, `smtp.pass`).
