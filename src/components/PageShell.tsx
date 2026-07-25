@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { PatientAuthMenu } from "@/components/PatientAuthMenu";
+import { AdminAuthMenu } from "@/components/admin/AdminAuthMenu";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -67,12 +68,19 @@ interface PageShellProps {
   className?: string;
   hideHeader?: boolean;
   wide?: boolean;
+  headerVariant?: "default" | "admin";
 }
 
-export function PageShell({ children, className, hideHeader, wide }: PageShellProps) {
+export function PageShell({
+  children,
+  className,
+  hideHeader,
+  wide,
+  headerVariant = "default",
+}: PageShellProps) {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      {!hideHeader && <TruCareHeader />}
+      {!hideHeader && (headerVariant === "admin" ? <AdminHeader /> : <TruCareHeader />)}
       <main
         className={cn(
           "mx-auto w-full flex-1 px-4 pb-16 pt-6 sm:px-6",
@@ -116,6 +124,22 @@ export function TruCareHeader() {
         </Link>
         <div className="flex items-center justify-end">
           <PatientAuthMenu />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function AdminHeader() {
+  return (
+    <header className="border-b border-hair bg-background">
+      <div className="mx-auto grid max-w-6xl grid-cols-3 items-center px-4 py-4">
+        <div className="flex items-center justify-start" />
+        <Link to="/admin" className="flex items-center justify-center gap-2 text-brand">
+          <span className="text-2xl font-extrabold tracking-tight">TruCare</span>
+        </Link>
+        <div className="flex items-center justify-end">
+          <AdminAuthMenu />
         </div>
       </div>
     </header>

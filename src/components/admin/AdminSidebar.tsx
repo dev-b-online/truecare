@@ -7,18 +7,22 @@ import {
   MessageSquare,
   FileText,
   Mail,
+  Send,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; end?: boolean };
 const NAV: NavItem[] = [
   { to: "/admin", label: "לוח בקרה", icon: LayoutDashboard, end: true },
+  { to: "/admin/patients", label: "מטופלים", icon: Users },
   { to: "/admin/notifications", label: "יומן הודעות", icon: Bell },
   { to: "/admin/incidents", label: "אירועים", icon: AlertTriangle },
   { to: "/admin/sms-templates", label: "תוכן הודעות SMS", icon: FileText },
   { to: "/admin/email-templates", label: "תוכן הודעות Email", icon: Mail },
   { to: "/admin/settings", label: "הגדרות API", icon: Settings },
   { to: "/admin/sms-settings", label: "הגדרות SMS", icon: MessageSquare },
+  { to: "/admin/smtp-settings", label: "הגדרות SMTP", icon: Send },
 ];
 
 export function AdminSidebar() {

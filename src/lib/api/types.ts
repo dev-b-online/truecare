@@ -120,7 +120,8 @@ export type SmsTemplateKey =
   | "otp_code"
   | "custom"
   | "start_treatment"
-  | "day_off";
+  | "day_off"
+  | "pre_break";
 
 export interface SmsTemplate {
   id: string;
@@ -149,4 +150,43 @@ export interface ApiSettings {
   baseUrl: string;
   useMock: boolean;
   authTokenLastRotated?: string;
+}
+
+export interface AdminPatient {
+  id: string;
+  firstName: string;
+  phoneMasked: string;
+  emailMasked: string;
+  channel: "sms" | "email";
+  startDate: string;
+  reminders: "on" | "off";
+  createdAt: string;
+}
+
+export interface AdminPlan {
+  id: string;
+  startDate: string;
+  cycleLengthDays: number;
+  treatmentDays: number;
+  breakDays: number;
+  createdAt: string;
+}
+
+export interface AdminNotificationLog {
+  id: string;
+  planId: string;
+  template: string;
+  date: string;
+  status: string;
+  sentAt: string | null;
+}
+
+export interface AdminPatientDetail {
+  patient: {
+    id: string;
+    firstName: string;
+    startDate: string;
+  };
+  plan: AdminPlan | null;
+  notifications: AdminNotificationLog[];
 }

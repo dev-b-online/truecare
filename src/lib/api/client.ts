@@ -3,6 +3,9 @@
 
 import type {
   AdminStats,
+  AdminPatient,
+  AdminPatientDetail,
+  AdminNotificationLog,
   ApiSettings,
   ConsentRecord,
   DoseEvent,
@@ -89,6 +92,10 @@ export const realApi = {
   // ── Admin stats ──────────────────────────────────────────────
   async getStats(): Promise<AdminStats> {
     return req("/admin/stats");
+  },
+
+  async getAdminMe(): Promise<{ id: string; email: string; name: string }> {
+    return req("/admin/me", {}, "admin");
   },
 
   // ── Notifications & Incidents ────────────────────────────────
@@ -198,6 +205,75 @@ export const realApi = {
       method: "PUT",
       body: JSON.stringify(input),
     });
+  },
+
+  // ── SMTP config ──────────────────────────────────────────────
+  async getSmtpConfig(): Promise<{
+    host: string;
+    port: number;
+    secure: string;
+    user: string;
+    passMasked: string;
+    providerConfigured: boolean;
+    source: string;
+  }> {
+    return req("/admin/smtp/config");
+  },
+  async setSmtpConfig(input: {
+    host?: string;
+    port?: number;
+    secure?: string;
+    user?: string;
+    pass?: string;
+  }) {
+    return req("/admin/smtp/config", {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
+  },
+  async sendSmtpTest(to: string): Promise<{ ok: boolean; providerCode: number }> {
+    return req("/admin/smtp/test", {
+      method: "POST",
+      body: JSON.stringify({ to }),
+    });
+  },
+
+  // ── Admin patients ─────────────────────────────────────────
+  async listPatients(): Promise<
+    {
+      id: string;
+      firstName: string;
+      phoneMasked: string;
+      emailMasked: string;
+      channel: "sms" | "email";
+      startDate: string;
+      reminders: "on" | "off";
+      createdAt: string;
+    }[]
+  > {
+    const res = await req<{ items: AdminPatient[] }>("/admin/patients");
+    return res.items ?? [];
+  },
+  async getPatientNotifications(patientId: string): Promise<{
+    patient: { id: string; firstName: string; startDate: string };
+    plan: {
+      id: string;
+      startDate: string;
+      cycleLengthDays: number;
+      treatmentDays: number;
+      breakDays: number;
+      createdAt: string;
+    } | null;
+    notifications: {
+      id: string;
+      planId: string;
+      template: string;
+      date: string;
+      status: string;
+      sentAt: string | null;
+    }[];
+  }> {
+    return req(`/admin/patients/${encodeURIComponent(patientId)}/notifications`);
   },
 
   // ── API settings (persisted in sessionStorage only) ──────────

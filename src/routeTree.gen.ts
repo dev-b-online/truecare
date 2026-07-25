@@ -20,9 +20,11 @@ import { Route as DiaryRouteImport } from './routes/diary'
 import { Route as ConsentRouteImport } from './routes/consent'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminSmtpSettingsRouteImport } from './routes/admin.smtp-settings'
 import { Route as AdminSmsTemplatesRouteImport } from './routes/admin.sms-templates'
 import { Route as AdminSmsSettingsRouteImport } from './routes/admin.sms-settings'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminPatientsRouteImport } from './routes/admin.patients'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminIncidentsRouteImport } from './routes/admin.incidents'
@@ -83,6 +85,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSmtpSettingsRoute = AdminSmtpSettingsRouteImport.update({
+  id: '/smtp-settings',
+  path: '/smtp-settings',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSmsTemplatesRoute = AdminSmsTemplatesRouteImport.update({
   id: '/sms-templates',
   path: '/sms-templates',
@@ -96,6 +103,11 @@ const AdminSmsSettingsRoute = AdminSmsSettingsRouteImport.update({
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPatientsRoute = AdminPatientsRouteImport.update({
+  id: '/patients',
+  path: '/patients',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
@@ -135,9 +147,11 @@ export interface FileRoutesByFullPath {
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/patients': typeof AdminPatientsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sms-settings': typeof AdminSmsSettingsRoute
   '/admin/sms-templates': typeof AdminSmsTemplatesRoute
+  '/admin/smtp-settings': typeof AdminSmtpSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -155,9 +169,11 @@ export interface FileRoutesByTo {
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/patients': typeof AdminPatientsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sms-settings': typeof AdminSmsSettingsRoute
   '/admin/sms-templates': typeof AdminSmsTemplatesRoute
+  '/admin/smtp-settings': typeof AdminSmtpSettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -176,9 +192,11 @@ export interface FileRoutesById {
   '/admin/incidents': typeof AdminIncidentsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/patients': typeof AdminPatientsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sms-settings': typeof AdminSmsSettingsRoute
   '/admin/sms-templates': typeof AdminSmsTemplatesRoute
+  '/admin/smtp-settings': typeof AdminSmtpSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -198,9 +216,11 @@ export interface FileRouteTypes {
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/notifications'
+    | '/admin/patients'
     | '/admin/settings'
     | '/admin/sms-settings'
     | '/admin/sms-templates'
+    | '/admin/smtp-settings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -218,9 +238,11 @@ export interface FileRouteTypes {
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/notifications'
+    | '/admin/patients'
     | '/admin/settings'
     | '/admin/sms-settings'
     | '/admin/sms-templates'
+    | '/admin/smtp-settings'
   id:
     | '__root__'
     | '/'
@@ -238,9 +260,11 @@ export interface FileRouteTypes {
     | '/admin/incidents'
     | '/admin/login'
     | '/admin/notifications'
+    | '/admin/patients'
     | '/admin/settings'
     | '/admin/sms-settings'
     | '/admin/sms-templates'
+    | '/admin/smtp-settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -336,6 +360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/smtp-settings': {
+      id: '/admin/smtp-settings'
+      path: '/smtp-settings'
+      fullPath: '/admin/smtp-settings'
+      preLoaderRoute: typeof AdminSmtpSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/sms-templates': {
       id: '/admin/sms-templates'
       path: '/sms-templates'
@@ -355,6 +386,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/patients': {
+      id: '/admin/patients'
+      path: '/patients'
+      fullPath: '/admin/patients'
+      preLoaderRoute: typeof AdminPatientsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/notifications': {
@@ -393,9 +431,11 @@ interface AdminRouteChildren {
   AdminIncidentsRoute: typeof AdminIncidentsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
+  AdminPatientsRoute: typeof AdminPatientsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSmsSettingsRoute: typeof AdminSmsSettingsRoute
   AdminSmsTemplatesRoute: typeof AdminSmsTemplatesRoute
+  AdminSmtpSettingsRoute: typeof AdminSmtpSettingsRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -403,9 +443,11 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminIncidentsRoute: AdminIncidentsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
+  AdminPatientsRoute: AdminPatientsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminSmsSettingsRoute: AdminSmsSettingsRoute,
   AdminSmsTemplatesRoute: AdminSmsTemplatesRoute,
+  AdminSmtpSettingsRoute: AdminSmtpSettingsRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

@@ -275,6 +275,34 @@ export const mockApi = {
       smsFailed: notifications.filter((n) => n.status === "failed").length,
     };
   },
+  async getAdminMe(): Promise<{ id: string; email: string; name: string }> {
+    await latency();
+    return {
+      id: "admin-1",
+      email: "admin@trucare.local",
+      name: "Admin",
+    };
+  },
+  async getMe(): Promise<Patient> {
+    await latency();
+    const token =
+      typeof localStorage !== "undefined" ? localStorage.getItem("trucare.session") : null;
+    if (!token) {
+      throw new Error("Unauthorized");
+    }
+    const patient = patients[0];
+    return {
+      id: patient.id,
+      firstName: patient.firstName,
+      channel: "sms",
+      phoneMasked: "050-0000000",
+      emailMasked: "patient@example.com",
+      startDate: patient.startDate,
+      reminders: "on",
+      language: "he",
+      createdAt: patient.createdAt,
+    };
+  },
   async listNotifications(): Promise<NotificationLog[]> {
     await latency();
     return [...notifications].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
