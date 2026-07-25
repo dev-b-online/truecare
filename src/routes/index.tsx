@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
+import { LoginDialog } from "@/components/LoginDialog";
+import { useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: WelcomeRoute,
@@ -16,6 +18,8 @@ export const Route = createFileRoute("/")({
 });
 
 function WelcomeRoute() {
+  const [loginOpen, setLoginOpen] = useState(false);
+
   return (
     <PageShell>
       <div className="mt-4 flex flex-col items-center gap-6 text-center">
@@ -39,8 +43,16 @@ function WelcomeRoute() {
           <Button asChild variant="outline" className="h-12 rounded-full text-base">
             <Link to="/diary-demo">כניסה ליומן הדגמה</Link>
           </Button>
+          <Button
+            variant="outline"
+            className="h-12 rounded-full text-base"
+            onClick={() => setLoginOpen(true)}
+          >
+            כניסה למטופל קיים
+          </Button>
         </div>
       </div>
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
     </PageShell>
   );
 }

@@ -75,14 +75,14 @@ function DiaryDemoRoute() {
 
         <div className="flex items-center justify-between rounded-2xl border border-hair bg-card px-4 py-2 text-xs">
           <span className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-brand" /> ימי טיפול
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-brand" /> יום קבלת מנת
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-[color:var(--color-turquoise)]" />
-            ימי הפסקה
+            יום הפסקה
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-destructive" /> מנה שהוחמצה
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-destructive" /> יום החמצת מנת
           </span>
         </div>
 

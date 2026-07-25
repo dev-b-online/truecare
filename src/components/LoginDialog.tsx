@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import {
   Dialog,
@@ -15,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { OtpInput } from "@/components/OtpInput";
 import { api } from "@/lib/api";
 import { IL_PHONE_REGEX } from "@/lib/validation";
-import { maskPhone } from "@/lib/mask";
+import { maskPhone, maskEmail } from "@/lib/mask";
 import { usePatientAuth, PATIENT_TOKEN_KEY } from "@/state/patientAuthStore";
 
 /** Drop any leftover patient session so a stale token never leaks into a fresh
@@ -31,14 +32,17 @@ interface LoginDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type Step = "phone" | "code";
+type Step = "identifier" | "code";
+
+type LoginMode = "phone" | "email";
 
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const nav = useNavigate();
   const login = usePatientAuth((s) => s.login);
 
-  const [step, setStep] = useState<Step>("phone");
-  const [phone, setPhone] = useState("");
+  const [mode, setMode] = useState<LoginMode>("phone");
+  const [step, setStep] = useState<Step>("identifier");
+  const [identifier, setIdentifier] = useState("");
   const [code, setCode] = useState("");
   const [challengeId, setChallengeId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -50,8 +54,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    setStep("phone");
-    setPhone("");
+    setStep("identifier");
+    setIdentifier("");
     setCode("");
     setChallengeId(null);
     setBusy(false);
@@ -73,15 +77,24 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
   const fetchRateLimit = async () => {
     try {
-      const r = await api.getRateLimit(phone);
+      const r = await api.getRateLimit(identifier);
       setRateLimit({ remaining: r.remaining, max: r.max });
     } catch {
       setRateLimit(null);
     }
   };
 
+  const isEmail = mode === "email";
+
   const requestCode = async () => {
-    if (!IL_PHONE_REGEX.test(phone)) {
+    if (isEmail) {
+      const emailSchema = z.string().trim().email("כתובת אימייל לא תקינה").max(255);
+      const parsed = emailSchema.safeParse(identifier);
+      if (!parsed.success) {
+        toast.error("כתובת אימייל לא תקינה");
+        return;
+      }
+    } else if (!IL_PHONE_REGEX.test(identifier)) {
       toast.error("מספר טלפון ישראלי לא תקין (05XXXXXXXX)");
       return;
     }
@@ -89,12 +102,12 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     setRateLimit(null);
     try {
       clearStalePatientToken();
-      const r = await api.requestOtp(phone);
+      const r = await api.requestOtp(identifier);
       setChallengeId(r.challengeId);
       setStep("code");
       setCode("");
       await fetchRateLimit();
-      toast.success("נשלח קוד אימות במסרון");
+      toast.success(isEmail ? "נשלח קוד אימות לאימייל" : "נשלח קוד אימות במסרון");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "שליחת הקוד נכשלה");
     } finally {
@@ -108,10 +121,8 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     try {
       const r = await api.verifyOtp(challengeId, code);
       if (!r.registered || !r.sessionToken) {
-        // Phone verified, but no patient account exists for it yet.
-        // Drop any stale token so /register mints and uses a clean session.
         clearStalePatientToken();
-        toast.error("לא נמצא מטופל עם מספר זה. יש להירשם תחילה.");
+        toast.error("לא נמצא מטופל עם פרטי זה. יש להירשם תחילה.");
         handleOpenChange(false);
         nav({ to: "/register" });
         return;
@@ -131,7 +142,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     setBusy(true);
     try {
       clearStalePatientToken();
-      const r = await api.resendOtp(phone);
+      const r = await api.resendOtp(identifier);
       setChallengeId(r.challengeId);
       setCode("");
       await fetchRateLimit();
@@ -146,12 +157,12 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md rounded-2xl" dir="rtl">
-        {step === "phone" ? (
+        {step === "identifier" ? (
           <>
             <DialogHeader className="text-right">
               <DialogTitle>כניסת מטופל</DialogTitle>
               <DialogDescription>
-                הזן את מספר הטלפון הנייד שלך. נשלח לך קוד אימות חד-פעמי במסרון.
+                הזן את מספר הטלפון הנייד או כתובת האימייל שלך. נשלח קוד אימות חד-פעמי.
               </DialogDescription>
             </DialogHeader>
             <form
@@ -161,23 +172,51 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               }}
               className="flex flex-col gap-4"
             >
+              <div className="flex flex-col gap-2">
+                <div className="flex rounded-xl bg-muted p-1">
+                  <button
+                    type="button"
+                    className={`flex-1 rounded-lg py-1.5 text-sm font-medium transition-colors ${
+                      mode === "phone" ? "bg-background shadow-sm" : "text-muted-foreground"
+                    }`}
+                    onClick={() => setMode("phone")}
+                  >
+                    טלפון
+                  </button>
+                  <button
+                    type="button"
+                    className={`flex-1 rounded-lg py-1.5 text-sm font-medium transition-colors ${
+                      mode === "email" ? "bg-background shadow-sm" : "text-muted-foreground"
+                    }`}
+                    onClick={() => setMode("email")}
+                  >
+                    אימייל
+                  </button>
+                </div>
+              </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="login-phone">מספר טלפון נייד</Label>
+                <Label htmlFor="login-identifier">
+                  {mode === "phone" ? "מספר טלפון נייד" : "כתובת אימייל"}
+                </Label>
                 <Input
-                  id="login-phone"
-                  dir="ltr"
-                  inputMode="numeric"
+                  id="login-identifier"
+                  dir={mode === "phone" ? "ltr" : "ltr"}
+                  inputMode={mode === "phone" ? "numeric" : "email"}
                   autoFocus
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                  placeholder="0501234567"
+                  value={identifier}
+                  onChange={(e) =>
+                    mode === "phone"
+                      ? setIdentifier(e.target.value.replace(/\D/g, "").slice(0, 10))
+                      : setIdentifier(e.target.value)
+                  }
+                  placeholder={mode === "phone" ? "0501234567" : "you@example.com"}
                   className="h-11 rounded-xl bg-background text-right"
                 />
               </div>
               <Button
                 type="submit"
                 className="h-12 rounded-full text-base"
-                disabled={busy || !IL_PHONE_REGEX.test(phone)}
+                disabled={busy || identifier.trim() === ""}
               >
                 {busy ? "שולח..." : "שלח קוד אימות"}
               </Button>
@@ -186,11 +225,11 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
         ) : (
           <>
             <DialogHeader className="text-right">
-              <DialogTitle>אימות טלפון</DialogTitle>
+              <DialogTitle>אימות {isEmail ? "אימייל" : "טלפון"}</DialogTitle>
               <DialogDescription>
-                נשלח קוד בן 6 ספרות למספר{" "}
+                נשלח קוד בן 6 ספרות ל{isEmail ? "כתובת" : "מספר"}{" "}
                 <span className="font-mono font-semibold text-foreground" dir="ltr">
-                  {maskPhone(phone)}
+                  {isEmail ? maskEmail(identifier) : maskPhone(identifier)}
                 </span>
               </DialogDescription>
             </DialogHeader>
@@ -207,10 +246,10 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                 <button
                   type="button"
                   className="text-muted-foreground hover:text-foreground"
-                  onClick={() => setStep("phone")}
+                  onClick={() => setStep("identifier")}
                   disabled={busy}
                 >
-                  שינוי מספר
+                  שינוי פרטי התקשרות
                 </button>
                 <button
                   type="button"

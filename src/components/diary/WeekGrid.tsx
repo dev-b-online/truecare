@@ -5,11 +5,10 @@ import { format } from "date-fns";
 type WeekGridProps = {
   title: string;
   cells: ReturnType<typeof buildTwoWeekGrid>;
-  onMark?: (id: string, s: "taken" | "missed") => void;
   startDate?: string;
 };
 
-export function WeekGrid({ title, cells, onMark, startDate }: WeekGridProps) {
+export function WeekGrid({ title, cells, startDate }: WeekGridProps) {
   void startDate;
   return (
     <section className="rounded-2xl border border-hair bg-card p-3">
@@ -21,7 +20,7 @@ export function WeekGrid({ title, cells, onMark, startDate }: WeekGridProps) {
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-4 lg:grid-cols-7">
         {cells.map((c) => (
-          <DayCard key={c.iso} cell={c} onMark={onMark} />
+          <DayCard key={c.iso} cell={c} />
         ))}
       </div>
     </section>

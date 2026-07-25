@@ -3,7 +3,7 @@ import { PageShell } from "@/components/PageShell";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { buildTwoWeekGrid, startOfWeek } from "@/lib/calendar";
-import { parseISO, addDays, format, startOfMonth } from "date-fns";
+import { parseISO, addDays, format } from "date-fns";
 import { useDiary } from "@/state/diaryStore";
 import { DayCard } from "@/components/diary/DayCard";
 import { ResetCycleModal } from "@/components/ResetCycleModal";
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/diary")({
 });
 
 function DiaryRoute() {
-  const { planId, anchorDate, setAnchor } = useDiary();
+  const { anchorDate, setAnchor } = useDiary();
   const qc = useQueryClient();
   const nav = useNavigate();
   const [resetOpen, setResetOpen] = useState(false);
@@ -64,12 +64,6 @@ function DiaryRoute() {
   const shift = (days: number) => setAnchor(format(addDays(anchor, days), "yyyy-MM-dd"));
   const monthLabel = `${HEBREW_MONTHS[anchor.getMonth()]} ${anchor.getFullYear()}`;
 
-  const mark = async (id: string, status: "taken" | "missed") => {
-    await api.markDose(id, status);
-    qc.invalidateQueries({ queryKey: ["doses", planId] });
-    qc.invalidateQueries({ queryKey: ["admin", "stats"] });
-  };
-
   const onReset = async (newStartDate: string) => {
     try {
       await api.resetCycle(newStartDate);
@@ -104,19 +98,19 @@ function DiaryRoute() {
 
         <div className="flex items-center justify-between rounded-2xl border border-hair bg-card px-4 py-2 text-xs">
           <span className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-brand" /> ימי טיפול
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-brand" /> יום קבלת מנת
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-[color:var(--color-turquoise)]" />
-            ימי הפסקה
+            יום הפסקה
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-destructive" /> מנה שהוחמצה
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-destructive" /> יום החמצת מנת
           </span>
         </div>
 
-        <WeekGrid title="שבוע 1" cells={week1} onMark={mark} startDate={startDate} />
-        <WeekGrid title="שבוע 2" cells={week2} onMark={mark} startDate={startDate} />
+        <WeekGrid title="שבוע 1" cells={week1} startDate={startDate} />
+        <WeekGrid title="שבוע 2" cells={week2} startDate={startDate} />
 
         <div className="flex items-center justify-center gap-2">
           <Button
