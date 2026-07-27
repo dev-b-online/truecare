@@ -39,11 +39,16 @@ function getNotificationStatus(
   notifications: AdminPatientDetail["notifications"],
   dateIso: string,
   cycleDay: number,
+  planStartDate: string,
 ): { status: NotificationStatus; template?: string; error?: string } {
   const relevantTemplates: Record<number, string> = {
-    1: "start_treatment",
     4: "pre_break",
+    7: "new_cycle",
   };
+
+  if (cycleDay === 1 && dateIso === planStartDate) {
+    relevantTemplates[1] = "start_treatment";
+  }
 
   const templateKey = relevantTemplates[cycleDay];
   if (!templateKey) {
@@ -92,8 +97,11 @@ function CalendarView({
         </div>
         <div className="grid grid-cols-7 gap-1">
           {cells.map((cell) => {
-            const notifStatus = getNotificationStatus(notifications, cell.iso, cell.cycleDay);
-            const isRelevantDay = [1, 4].includes(cell.cycleDay) && !cell.isBeforeStart;
+            const notifStatus = getNotificationStatus(notifications, cell.iso, cell.cycleDay, plan.startDate);
+            const isRelevantDay = (
+              (cell.cycleDay === 1 && cell.iso === plan.startDate) ||
+              [4, 7].includes(cell.cycleDay)
+            ) && !cell.isBeforeStart;
 
             return (
               <div

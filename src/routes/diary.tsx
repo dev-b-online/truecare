@@ -83,30 +83,17 @@ function DiaryRoute() {
       <div className="mx-auto flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => shift(-14)} className="rounded-full">
+            אחורה
             <ChevronRight className="h-4 w-4" />
-            שבועות אחורה
           </Button>
           <div className="text-center">
             <h1 className="text-lg font-bold text-foreground">היומן שלי</h1>
             <p className="text-xs text-muted-foreground">{monthLabel}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => shift(14)} className="rounded-full">
-            שבועות קדימה
+            קדימה
             <ChevronLeft className="h-4 w-4" />
           </Button>
-        </div>
-
-        <div className="flex items-center justify-between rounded-2xl border border-hair bg-card px-4 py-2 text-xs">
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-brand" /> יום קבלת מנת
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-[color:var(--color-turquoise)]" />
-            יום הפסקה
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-destructive" /> יום החמצת מנת
-          </span>
         </div>
 
         <WeekGrid title="שבוע 1" cells={week1} startDate={startDate} />

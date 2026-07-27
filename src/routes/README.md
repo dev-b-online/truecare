@@ -45,5 +45,3 @@ is `src/routes/__root.tsx`.
 | `instructions.tsx`           | `/instructions` (инструкции)            |
 | `diary.tsx`                  | `/diary` (дневник пациента)            |
 | `diary-demo.tsx`             | `/diary-demo` (демо-дневник)           |
-| `terms-of-use.tsx`           | `/terms-of-use`                        |
-| `privacy-policy.tsx`         | `/privacy-policy`                      |

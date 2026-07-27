@@ -650,6 +650,8 @@ components:
           custom,
           start_treatment,
           day_off,
+          pre_break,
+          new_cycle,
         ]
 
     SmsTemplate:
@@ -684,6 +686,8 @@ components:
           custom,
           start_treatment,
           day_off,
+          pre_break,
+          new_cycle,
         ]
 
     EmailTemplate:

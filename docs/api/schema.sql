@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE TABLE IF NOT EXISTS sms_templates (
   id             CHAR(26)     NOT NULL,
   key_name       ENUM('welcome','morning_reminder','evening_reminder',
-                      'missed_dose','otp_code','custom','start_treatment','day_off') NOT NULL,
+                      'missed_dose','otp_code','custom','start_treatment','day_off','pre_break','new_cycle') NOT NULL,
   -- Persistent generated column: NULL for 'custom' rows (allows many),
   -- equal to key_name otherwise (enforces uniqueness via the index below).
   -- MariaDB 10.3 supports PERSISTENT generated columns; MySQL 8 users can
@@ -189,7 +189,7 @@ CREATE TABLE IF NOT EXISTS sms_templates (
 CREATE TABLE IF NOT EXISTS email_templates (
   id             CHAR(26)     NOT NULL,
   key_name       ENUM('welcome','morning_reminder','evening_reminder',
-                      'missed_dose','otp_code','custom','start_treatment','day_off') NOT NULL,
+                      'missed_dose','otp_code','custom','start_treatment','day_off','pre_break','new_cycle') NOT NULL,
   key_unique     VARCHAR(32)  AS (IF(key_name = 'custom', NULL, key_name)) PERSISTENT,
   name           VARCHAR(120) NOT NULL,
   subject        VARCHAR(180) NOT NULL,

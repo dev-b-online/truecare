@@ -98,13 +98,23 @@ export function PageShell({
             className="h-12 w-auto object-contain"
           />
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <Link to="/terms-of-use" className="hover:text-foreground">
+            <a
+              href="https://www.astrazeneca.com/legal-notice-and-terms-of-use.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground"
+            >
               תנאי שימוש
-            </Link>
-            <Link to="/privacy-policy" className="hover:text-foreground">
+            </a>
+            <a
+              href="https://www.azprivacy.astrazeneca.com/il/IL/privacy-notices/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground"
+            >
               מדיניות פרטיות
-            </Link>
-            <span>POWERED BY B-ONLINE</span>
+            </a>
+            <span className="text-muted-foreground">Powered by B-Online</span>
           </div>
         </div>
       </footer>

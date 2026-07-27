@@ -121,7 +121,8 @@ export type SmsTemplateKey =
   | "custom"
   | "start_treatment"
   | "day_off"
-  | "pre_break";
+  | "pre_break"
+  | "new_cycle";
 
 export interface SmsTemplate {
   id: string;

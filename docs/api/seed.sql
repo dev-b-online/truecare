@@ -57,6 +57,11 @@ INSERT INTO sms_templates (id, key_name, name, body, enabled, updated_at) VALUES
    '{{firstName}}, מחר תקופת הפסקה של 3 ימים. מחר, מחרתיים ומחרתיים לא תצטרך לקחת תרופה.',
    1, CURRENT_TIMESTAMP(3)),
 
+  ('01J8TMPL0000000000000NEWC', 'new_cycle',
+   'תחילת מחזור חדש',
+   '{{firstName}}, מחר מתחיל מחזור חדש של 4 ימי טיפול. אל תשכח/י לקחת את המנות בזמנן!',
+   1, CURRENT_TIMESTAMP(3)),
+
   ('01J8TMPL0000000000000DAYOF', 'day_off',
    'יום הפסקה',
    'שלום {{firstName}}, היום יום הפסקה ואין ליטול את הטיפול. יש לפעול לפי הוראות הרופא.',
@@ -105,6 +110,12 @@ INSERT INTO email_templates (id, key_name, name, subject, body, enabled, updated
    'תזכורת לפני הפסקה',
    'תזכורת לפני הפסקה — TruCare',
    '<p>{{firstName}},</p><p>מחר מתחילה תקופת הפסקה של 3 ימים. ב-3 הימים הקרובים לא תצטרכו לקחת תרופה.</p>',
+   1, CURRENT_TIMESTAMP(3)),
+
+  ('01J8TMPL0000000000001NEWC', 'new_cycle',
+   'תחילת מחזור חדש',
+   'תחילת מחזור חדש — TruCare',
+   '<p>{{firstName}},</p><p>מחר מתחיל מחזור חדש של 4 ימי טיפול. אל תשכח/י לקחת את המנות בזמנן!</p>',
    1, CURRENT_TIMESTAMP(3)),
 
   ('01J8TMPL0000000000001DAYM', 'day_off',

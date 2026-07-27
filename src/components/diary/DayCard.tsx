@@ -49,7 +49,7 @@ export function DayCard({ cell }: DayCardProps) {
           {hasMissed ? (
             <span className="text-destructive">יום החמצת מנת</span>
           ) : (
-            <span className="text-brand">יום קבלת מנת</span>
+             <span className="text-brand">יום נטילת תרופה</span>
           )}
         </div>
       )}

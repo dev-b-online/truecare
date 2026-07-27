@@ -39,6 +39,7 @@ const TEMPLATE_KEYS: { value: SmsTemplateKey; label: string }[] = [
   { value: "day_off", label: "יום הפסקה" },
   { value: "start_treatment", label: "התחלת טיפול" },
   { value: "pre_break", label: "תזכורת לפני הפסקה" },
+  { value: "new_cycle", label: "תחילת מחזור חדש" },
   { value: "missed_dose", label: "מנה שהוחמצה" },
   { value: "otp_code", label: "קוד אימות" },
   { value: "custom", label: "מותאם אישית" },
