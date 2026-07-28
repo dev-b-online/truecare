@@ -9,8 +9,6 @@ interface DayCardProps {
 export function DayCard({ cell }: DayCardProps) {
   const isBreak = !cell.isTreatmentDay;
   const isPreStart = cell.isBeforeStart;
-  const hasMissed =
-    cell.doses.morning?.status === "missed" || cell.doses.evening?.status === "missed";
 
   return (
     <div
@@ -46,11 +44,7 @@ export function DayCard({ cell }: DayCardProps) {
         </div>
       ) : (
         <div className="flex flex-1 items-center justify-center py-6 text-sm font-medium">
-          {hasMissed ? (
-            <span className="text-destructive">יום החמצת מנת</span>
-          ) : (
-             <span className="text-brand">יום נטילת תרופה</span>
-          )}
+          <span className="text-brand">יום נטילת תרופה</span>
         </div>
       )}
     </div>
