@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -115,7 +115,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     }
   };
 
-  const verify = async () => {
+  const verify = useCallback(async () => {
     if (!challengeId || code.length !== 6) return;
     setBusy(true);
     try {
@@ -136,7 +136,38 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     } finally {
       setBusy(false);
     }
-  };
+  }, [challengeId, code, handleOpenChange, login, nav]);
+
+  // WebOTP API: auto-fill OTP from SMS on Android Chrome
+  useEffect(() => {
+    if (!challengeId) return;
+    if (!("OTPCredential" in window)) return;
+
+    const abortController = new AbortController();
+
+    navigator.credentials
+      .get({
+        // @ts-expect-error WebOTP not in TS types yet
+        otp: { transport: ["sms"] },
+        signal: abortController.signal,
+      })
+      .then((credential) => {
+        // @ts-expect-error WebOTP not in TS types yet
+        const otp = credential as { code: string };
+        setCode(otp.code);
+        setTimeout(() => {
+          void verify();
+        }, 300);
+      })
+      .catch(() => {
+        // user cancelled or WebOTP not supported — ignore
+      });
+
+    return () => {
+      abortController.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [challengeId]);
 
   const resend = async () => {
     setBusy(true);

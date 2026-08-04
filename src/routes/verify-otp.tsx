@@ -106,10 +106,12 @@ function VerifyOtpRoute() {
 
     navigator.credentials
       .get({
+        // @ts-expect-error WebOTP not in TS types yet
         otp: { transport: ["sms"] },
         signal: abortController.signal,
       })
       .then((credential) => {
+        // @ts-expect-error WebOTP not in TS types yet
         const otp = credential as { code: string };
         setCode(otp.code);
         setTimeout(() => {
