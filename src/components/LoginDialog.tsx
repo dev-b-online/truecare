@@ -48,12 +48,19 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const [busy, setBusy] = useState(false);
   const [rateLimit, setRateLimit] = useState<{ remaining: number; max: number } | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const webOtpRef = useRef<Promise<string | null> | null>(null);
+  const webOtpAbortRef = useRef<AbortController | null>(null);
 
   const resetFlow = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+    if (webOtpAbortRef.current) {
+      webOtpAbortRef.current.abort();
+      webOtpAbortRef.current = null;
+    }
+    webOtpRef.current = null;
     setStep("identifier");
     setIdentifier("");
     setCode("");
@@ -86,6 +93,30 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
   const isEmail = mode === "email";
 
+  const startWebOtp = (): void => {
+    if (!("OTPCredential" in window)) return;
+    try {
+      const abortController = new AbortController();
+      webOtpAbortRef.current = abortController;
+      webOtpRef.current = new Promise<string | null>((resolve) => {
+        navigator.credentials
+          .get({
+            // @ts-expect-error WebOTP not in TS types yet
+            otp: { transport: ["sms"] },
+            signal: abortController.signal,
+          })
+          .then((credential) => {
+            // @ts-expect-error WebOTP not in TS types yet
+            const otp = credential as { code: string };
+            resolve(otp.code);
+          })
+          .catch(() => resolve(null));
+      });
+    } catch {
+      webOtpRef.current = Promise.resolve(null);
+    }
+  };
+
   const requestCode = async () => {
     if (isEmail) {
       const emailSchema = z.string().trim().email("כתובת אימייל לא תקינה").max(255);
@@ -99,45 +130,16 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       return;
     }
 
-    let webOtpCode: string | null = null;
-
-    if ("OTPCredential" in window) {
-      try {
-        const abortController = new AbortController();
-        navigator.credentials
-          .get({
-            // @ts-expect-error WebOTP not in TS types yet
-            otp: { transport: ["sms"] },
-            signal: abortController.signal,
-          })
-          .then((credential) => {
-            // @ts-expect-error WebOTP not in TS types yet
-            const otp = credential as { code: string };
-            webOtpCode = otp.code;
-          })
-          .catch(() => {});
-      } catch {
-        // WebOTP not supported
-      }
-    }
-
     setBusy(true);
     setRateLimit(null);
+    startWebOtp();
+
     try {
       clearStalePatientToken();
       const r = await api.requestOtp(identifier);
       setChallengeId(r.challengeId);
       setStep("code");
-
-      if (webOtpCode) {
-        setCode(webOtpCode);
-        setTimeout(() => {
-          void verify();
-        }, 600);
-      } else {
-        setCode("");
-      }
-
+      setCode("");
       await fetchRateLimit();
       toast.success(isEmail ? "נשלח קוד אימות לאימייל" : "נשלח קוד אימות במסרון");
     } catch (err) {
@@ -147,33 +149,62 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     }
   };
 
-  const verify = useCallback(async () => {
-    if (!challengeId || code.length !== 6) return;
-    setBusy(true);
-    try {
-      const r = await api.verifyOtp(challengeId, code);
-      if (!r.registered || !r.sessionToken) {
-        clearStalePatientToken();
-        toast.error("לא נמצא מטופל עם פרטי זה. יש להירשם תחילה.");
+  const verify = useCallback(
+    async (codeToVerify: string) => {
+      if (!challengeId || codeToVerify.length !== 6) return;
+      setBusy(true);
+      try {
+        const r = await api.verifyOtp(challengeId, codeToVerify);
+        if (!r.registered || !r.sessionToken) {
+          clearStalePatientToken();
+          toast.error("לא נמצא מטופל עם פרטי זה. יש להירשם תחילה.");
+          handleOpenChange(false);
+          nav({ to: "/register" });
+          return;
+        }
+        const patient = await login(r.sessionToken);
         handleOpenChange(false);
-        nav({ to: "/register" });
-        return;
+        toast.success(patient ? `ברוך הבא, ${patient.firstName}!` : "התחברת בהצלחה");
+        nav({ to: "/diary" });
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "האימות נכשל");
+      } finally {
+        setBusy(false);
       }
-      const patient = await login(r.sessionToken);
-      handleOpenChange(false);
-      toast.success(patient ? `ברוך הבא, ${patient.firstName}!` : "התחברת בהצלחה");
-      nav({ to: "/diary" });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "האימות נכשל");
-    } finally {
-      setBusy(false);
-    }
-  }, [challengeId, code, handleOpenChange, login, nav]);
+    },
+    [challengeId, handleOpenChange, login, nav],
+  );
+
+  // WebOTP: listen for code arrival and auto-submit when ready
+  useEffect(() => {
+    if (!challengeId || step !== "code") return;
+    if (!webOtpRef.current) return;
+
+    let cancelled = false;
+
+    webOtpRef.current.then((otpCode) => {
+      if (cancelled || !otpCode) return;
+      setCode(otpCode);
+      setTimeout(() => {
+        void verify(otpCode);
+      }, 600);
+    });
+
+    return () => {
+      cancelled = true;
+      if (webOtpAbortRef.current) {
+        webOtpAbortRef.current.abort();
+      }
+      webOtpRef.current = null;
+      webOtpAbortRef.current = null;
+    };
+  }, [challengeId, step, verify]);
 
   const resend = async () => {
     setBusy(true);
     try {
       clearStalePatientToken();
+      startWebOtp();
       const r = await api.resendOtp(identifier);
       setChallengeId(r.challengeId);
       setCode("");
@@ -270,7 +301,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               <Button
                 className="h-12 w-full rounded-full text-base"
                 disabled={code.length !== 6 || busy}
-                onClick={() => void verify()}
+                onClick={() => void verify(code)}
               >
                 {busy ? "מאמת..." : "התחבר"}
               </Button>
