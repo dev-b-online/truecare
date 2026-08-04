@@ -45,6 +45,7 @@ export function OtpInput({ value, onChange, length = 6, disabled }: OtpInputProp
           }}
           value={chars[i].trim()}
           disabled={disabled}
+          autoComplete="one-time-code"
           onPaste={onPaste}
           onKeyDown={(e) => onKey(e, i)}
           onChange={(e) => {

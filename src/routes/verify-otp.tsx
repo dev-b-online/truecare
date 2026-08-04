@@ -3,7 +3,7 @@ import { PageShell } from "@/components/PageShell";
 import { OtpInput } from "@/components/OtpInput";
 import { Button } from "@/components/ui/button";
 import { useOnboarding } from "@/state/onboardingStore";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { maskPhone, maskEmail } from "@/lib/mask";
 import { toast } from "sonner";
@@ -64,7 +64,7 @@ function VerifyOtpRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const doVerify = async () => {
+  const doVerify = useCallback(async () => {
     if (!challengeId || code.length !== 6) return;
     setSubmitting(true);
     try {
@@ -81,7 +81,7 @@ function VerifyOtpRoute() {
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [challengeId, code]);
 
   const doResend = async () => {
     try {
@@ -96,6 +96,35 @@ function VerifyOtpRoute() {
       toast.error(err instanceof Error ? err.message : "שליחה נכשלה");
     }
   };
+
+  // WebOTP API: auto-fill OTP from SMS on Android Chrome
+  useEffect(() => {
+    if (!challengeId) return;
+    if (!("OTPCredential" in window)) return;
+
+    const abortController = new AbortController();
+
+    navigator.credentials
+      .get({
+        otp: { transport: ["sms"] },
+        signal: abortController.signal,
+      })
+      .then((credential) => {
+        const otp = credential as { code: string };
+        setCode(otp.code);
+        setTimeout(() => {
+          void doVerify();
+        }, 300);
+      })
+      .catch(() => {
+        // user cancelled or WebOTP not supported — ignore
+      });
+
+    return () => {
+      abortController.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [challengeId]);
 
   const isEmail = s.channel === "email";
   const maskedRecipient =
