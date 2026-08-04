@@ -48,19 +48,12 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const [busy, setBusy] = useState(false);
   const [rateLimit, setRateLimit] = useState<{ remaining: number; max: number } | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const webOtpRef = useRef<Promise<string | null> | null>(null);
-  const webOtpAbortRef = useRef<AbortController | null>(null);
 
   const resetFlow = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    if (webOtpAbortRef.current) {
-      webOtpAbortRef.current.abort();
-      webOtpAbortRef.current = null;
-    }
-    webOtpRef.current = null;
     setStep("identifier");
     setIdentifier("");
     setCode("");
@@ -93,30 +86,6 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
   const isEmail = mode === "email";
 
-  const startWebOtp = (): void => {
-    if (!("OTPCredential" in window)) return;
-    try {
-      const abortController = new AbortController();
-      webOtpAbortRef.current = abortController;
-      webOtpRef.current = new Promise<string | null>((resolve) => {
-        navigator.credentials
-          .get({
-            // @ts-expect-error WebOTP not in TS types yet
-            otp: { transport: ["sms"] },
-            signal: abortController.signal,
-          })
-          .then((credential) => {
-            // @ts-expect-error WebOTP not in TS types yet
-            const otp = credential as { code: string };
-            resolve(otp.code);
-          })
-          .catch(() => resolve(null));
-      });
-    } catch {
-      webOtpRef.current = Promise.resolve(null);
-    }
-  };
-
   const requestCode = async () => {
     if (isEmail) {
       const emailSchema = z.string().trim().email("כתובת אימייל לא תקינה").max(255);
@@ -132,7 +101,6 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 
     setBusy(true);
     setRateLimit(null);
-    startWebOtp();
 
     try {
       clearStalePatientToken();
@@ -178,25 +146,30 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   // WebOTP: listen for code arrival and auto-submit when ready
   useEffect(() => {
     if (!challengeId || step !== "code") return;
-    if (!webOtpRef.current) return;
+    if (!("OTPCredential" in window)) return;
 
-    let cancelled = false;
+    const abortController = new AbortController();
 
-    webOtpRef.current.then((otpCode) => {
-      if (cancelled || !otpCode) return;
-      setCode(otpCode);
-      setTimeout(() => {
-        void verify(otpCode);
-      }, 600);
-    });
+    navigator.credentials
+      .get({
+        // @ts-expect-error WebOTP not in TS types yet
+        otp: { transport: ["sms"] },
+        signal: abortController.signal,
+      })
+      .then((credential) => {
+        // @ts-expect-error WebOTP not in TS types yet
+        const otp = credential as { code: string };
+        setCode(otp.code);
+        setTimeout(() => {
+          void verify(otp.code);
+        }, 600);
+      })
+      .catch(() => {
+        // user cancelled or WebOTP not supported — ignore
+      });
 
     return () => {
-      cancelled = true;
-      if (webOtpAbortRef.current) {
-        webOtpAbortRef.current.abort();
-      }
-      webOtpRef.current = null;
-      webOtpAbortRef.current = null;
+      abortController.abort();
     };
   }, [challengeId, step, verify]);
 
@@ -204,7 +177,6 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     setBusy(true);
     try {
       clearStalePatientToken();
-      startWebOtp();
       const r = await api.resendOtp(identifier);
       setChallengeId(r.challengeId);
       setCode("");
