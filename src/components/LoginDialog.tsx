@@ -98,6 +98,29 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       toast.error("מספר טלפון ישראלי לא תקין (05XXXXXXXX)");
       return;
     }
+
+    let webOtpCode: string | null = null;
+
+    if ("OTPCredential" in window) {
+      try {
+        const abortController = new AbortController();
+        navigator.credentials
+          .get({
+            // @ts-expect-error WebOTP not in TS types yet
+            otp: { transport: ["sms"] },
+            signal: abortController.signal,
+          })
+          .then((credential) => {
+            // @ts-expect-error WebOTP not in TS types yet
+            const otp = credential as { code: string };
+            webOtpCode = otp.code;
+          })
+          .catch(() => {});
+      } catch {
+        // WebOTP not supported
+      }
+    }
+
     setBusy(true);
     setRateLimit(null);
     try {
@@ -105,7 +128,16 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       const r = await api.requestOtp(identifier);
       setChallengeId(r.challengeId);
       setStep("code");
-      setCode("");
+
+      if (webOtpCode) {
+        setCode(webOtpCode);
+        setTimeout(() => {
+          void verify();
+        }, 600);
+      } else {
+        setCode("");
+      }
+
       await fetchRateLimit();
       toast.success(isEmail ? "נשלח קוד אימות לאימייל" : "נשלח קוד אימות במסרון");
     } catch (err) {
@@ -137,37 +169,6 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       setBusy(false);
     }
   }, [challengeId, code, handleOpenChange, login, nav]);
-
-  // WebOTP API: auto-fill OTP from SMS on Android Chrome
-  useEffect(() => {
-    if (!challengeId) return;
-    if (!("OTPCredential" in window)) return;
-
-    const abortController = new AbortController();
-
-    navigator.credentials
-      .get({
-        // @ts-expect-error WebOTP not in TS types yet
-        otp: { transport: ["sms"] },
-        signal: abortController.signal,
-      })
-      .then((credential) => {
-        // @ts-expect-error WebOTP not in TS types yet
-        const otp = credential as { code: string };
-        setCode(otp.code);
-        setTimeout(() => {
-          void verify();
-        }, 300);
-      })
-      .catch(() => {
-        // user cancelled or WebOTP not supported — ignore
-      });
-
-    return () => {
-      abortController.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [challengeId]);
 
   const resend = async () => {
     setBusy(true);

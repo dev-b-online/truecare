@@ -116,7 +116,7 @@ function VerifyOtpRoute() {
         setCode(otp.code);
         setTimeout(() => {
           void doVerify();
-        }, 300);
+        }, 600);
       })
       .catch(() => {
         // user cancelled or WebOTP not supported — ignore
