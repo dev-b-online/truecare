@@ -1,25 +1,15 @@
-import { useRef, type ClipboardEvent, type FormEvent, type KeyboardEvent } from "react";
+import { useRef, type ClipboardEvent, type KeyboardEvent } from "react";
 import { cn } from "@/lib/utils";
 
 interface OtpInputProps {
   value: string;
   onChange: (v: string) => void;
+  onComplete?: (code: string) => void; // called immediately when 6 digits are ready (Safari autofill)
   length?: number;
   disabled?: boolean;
 }
 
-/**
- * OTP input with Safari iOS SMS autofill support.
- *
- * Safari requires a single focused <input autocomplete="one-time-code"> to
- * offer autofill. We render one transparent full-width input on top of the
- * visual digit cells. It receives focus and Safari autofill, then we
- * distribute the value to the visual cells.
- *
- * Android Chrome uses WebOTP API (navigator.credentials.get) handled in the
- * parent component, so nothing extra is needed here for Android.
- */
-export function OtpInput({ value, onChange, length = 6, disabled }: OtpInputProps) {
+export function OtpInput({ value, onChange, onComplete, length = 6, disabled }: OtpInputProps) {
   const cellRefs = useRef<Array<HTMLInputElement | null>>([]);
   const overlayRef = useRef<HTMLInputElement | null>(null);
   const chars = value.padEnd(length, " ").slice(0, length).split("");
@@ -47,31 +37,36 @@ export function OtpInput({ value, onChange, length = 6, disabled }: OtpInputProp
     cellRefs.current[Math.min(text.length, length - 1)]?.focus();
   };
 
-  // Safari iOS: overlay input receives the full autofill value.
-  // We use setTimeout(0) because Safari fires onInput before the full
-  // autofill string is committed to input.value — reading it synchronously
-  // drops the first character.
-  const onOverlayInput = (e: FormEvent<HTMLInputElement>) => {
-    const el = e.currentTarget;
-    setTimeout(() => {
-      const text = (el.value ?? "").replace(/\D/g, "").slice(0, length);
-      if (!text) return;
-      onChange(text);
-      el.value = "";
+  // Safari iOS autofill: the overlay input receives the full OTP string.
+  // We read it in onChange (not onInput) to get the complete value Safari committed.
+  const onOverlayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value.replace(/\D/g, "").slice(0, length);
+    if (!text) return;
+
+    // update visual cells
+    onChange(text);
+
+    // reset overlay so Safari can autofill again if needed
+    e.target.value = "";
+
+    // if complete, trigger submit immediately — no need to press the button
+    if (text.length === length) {
+      onComplete?.(text);
+    } else {
       cellRefs.current[Math.min(text.length - 1, length - 1)]?.focus();
-    }, 0);
+    }
   };
 
   return (
     <div dir="ltr" className="relative flex items-center justify-center gap-2">
-      {/* Overlay input — full size, transparent, sits on top for Safari SMS autofill */}
+      {/* Overlay: single transparent input for Safari iOS SMS autofill */}
       <input
         ref={overlayRef}
         type="text"
         inputMode="numeric"
         autoComplete="one-time-code"
         autoFocus
-        onInput={onOverlayInput}
+        onChange={onOverlayChange}
         disabled={disabled}
         aria-label="קוד אימות"
         style={{
@@ -80,7 +75,7 @@ export function OtpInput({ value, onChange, length = 6, disabled }: OtpInputProp
           width: "100%",
           height: "100%",
           opacity: 0,
-          fontSize: 16, // prevents iOS zoom on focus
+          fontSize: 16,
           zIndex: 10,
           cursor: "text",
           caretColor: "transparent",
@@ -94,11 +89,10 @@ export function OtpInput({ value, onChange, length = 6, disabled }: OtpInputProp
       {Array.from({ length }).map((_, i) => (
         <input
           key={i}
-          ref={(el) => {
-            cellRefs.current[i] = el;
-          }}
+          ref={(el) => { cellRefs.current[i] = el; }}
           value={chars[i].trim()}
           disabled={disabled}
+          autoComplete="off"
           onPaste={onCellPaste}
           onKeyDown={(e) => onCellKey(e, i)}
           onChange={(e) => {
@@ -109,7 +103,6 @@ export function OtpInput({ value, onChange, length = 6, disabled }: OtpInputProp
           inputMode="numeric"
           maxLength={1}
           tabIndex={-1}
-          autoComplete="off"
           className={cn(
             "relative h-14 w-11 rounded-2xl border-2 border-hair bg-card text-center text-2xl font-semibold text-foreground",
             "focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30",

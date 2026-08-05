@@ -269,7 +269,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col items-center gap-5">
-              <OtpInput value={code} onChange={setCode} disabled={busy} />
+              <OtpInput value={code} onChange={setCode} onComplete={(c) => void verify(c)} disabled={busy} />
               <Button
                 className="h-12 w-full rounded-full text-base"
                 disabled={code.length !== 6 || busy}

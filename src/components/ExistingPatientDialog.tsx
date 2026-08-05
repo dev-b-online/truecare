@@ -91,11 +91,12 @@ export function ExistingPatientDialog({ open, onOpenChange, phone }: ExistingPat
     }
   };
 
-  const verify = async () => {
-    if (!challengeId || code.length !== 6) return;
+  const verify = async (codeArg?: string) => {
+    const codeToUse = codeArg ?? code;
+    if (!challengeId || codeToUse.length !== 6) return;
     setBusy(true);
     try {
-      const r = await api.verifyOtp(challengeId, code);
+      const r = await api.verifyOtp(challengeId, codeToUse);
       if (!r.registered || !r.sessionToken) {
         clearStalePatientToken();
         toast.error("לא נמצא מטופל עם מספר זה. יש להירשם תחילה.");
@@ -185,7 +186,7 @@ export function ExistingPatientDialog({ open, onOpenChange, phone }: ExistingPat
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col items-center gap-5">
-              <OtpInput value={code} onChange={setCode} disabled={busy} />
+              <OtpInput value={code} onChange={setCode} onComplete={(c) => void verify(c)} disabled={busy} />
               <Button
                 className="h-12 w-full rounded-full text-base"
                 disabled={code.length !== 6 || busy}

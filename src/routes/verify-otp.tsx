@@ -64,11 +64,12 @@ function VerifyOtpRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const doVerify = useCallback(async () => {
-    if (!challengeId || code.length !== 6) return;
+  const doVerify = useCallback(async (codeArg?: string) => {
+    const codeToUse = codeArg ?? code;
+    if (!challengeId || codeToUse.length !== 6) return;
     setSubmitting(true);
     try {
-      const r = await api.verifyOtp(challengeId, code);
+      const r = await api.verifyOtp(challengeId, codeToUse);
       if (r.sessionToken) {
         localStorage.setItem("trucare.session", r.sessionToken);
       } else {
@@ -143,7 +144,7 @@ function VerifyOtpRoute() {
           </span>
         </p>
         <div className="card-tint w-full rounded-2xl p-5">
-          <OtpInput value={code} onChange={setCode} disabled={submitting} />
+          <OtpInput value={code} onChange={setCode} onComplete={(c) => void doVerify(c)} disabled={submitting} />
         </div>
         <Button
           className="h-12 w-full rounded-full text-base"
