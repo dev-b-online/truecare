@@ -38,27 +38,24 @@ export function OtpInput({ value, onChange, onComplete, length = 6, disabled }: 
     else cellRefs.current[Math.min(text.length, length - 1)]?.focus();
   };
 
-  // Safari iOS: receives the autofill value via onChange (more reliable than onInput).
-  // We call onChange to update the parent state (activates the button),
-  // then immediately call onComplete to auto-submit without waiting for a tap.
   const onSafariChange = (e: ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value.replace(/\D/g, "").slice(0, length);
     if (!text) return;
     e.target.value = "";
-    onChange(text);           // update parent state → button becomes active
-    if (text.length === length) {
-      onComplete?.(text);     // auto-submit immediately
-    } else {
-      cellRefs.current[Math.min(text.length - 1, length - 1)]?.focus();
-    }
+    onChange(text);
+    if (text.length === length) onComplete?.(text);
+    else cellRefs.current[Math.min(text.length - 1, length - 1)]?.focus();
   };
 
   return (
+    // Outer wrapper — only as tall as the cells, so safari input never covers the button
     <div dir="ltr" className="relative flex items-center justify-center gap-2">
       {/*
-        Safari iOS autofill input — covers the cell area so Safari can target it,
-        but pointerEvents:"none" lets all taps (including the submit button) pass through.
-        clip+overflow hides the cursor/text visually.
+        Safari iOS autofill input.
+        - Covers exactly the cell row (same height/width as the container).
+        - opacity:0 + caretColor:transparent hides it visually.
+        - Does NOT have pointerEvents:none so Safari autofill engine works.
+        - height is fixed to cell height (56px = h-14) so it never bleeds below.
       */}
       <input
         ref={safariInputRef}
@@ -67,25 +64,26 @@ export function OtpInput({ value, onChange, onComplete, length = 6, disabled }: 
         autoComplete="one-time-code"
         onChange={onSafariChange}
         disabled={disabled}
-        aria-hidden="true"
+        aria-label="קוד אימות"
         tabIndex={-1}
         style={{
           position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "56px", // matches h-14 cell height — does not extend below
           opacity: 0,
           fontSize: 16,
-          pointerEvents: "none", // taps pass through to cells and button below
-          zIndex: 1,
+          zIndex: 2,
           border: "none",
           outline: "none",
           background: "transparent",
           caretColor: "transparent",
+          color: "transparent",
         }}
       />
 
-      {/* Visual digit cells */}
+      {/* Visual digit cells — z-index:3 so they receive tap events on top of safari input */}
       {Array.from({ length }).map((_, i) => (
         <input
           key={i}
@@ -102,7 +100,7 @@ export function OtpInput({ value, onChange, onComplete, length = 6, disabled }: 
           }}
           inputMode="numeric"
           maxLength={1}
-          style={{ position: "relative", zIndex: 2 }}
+          style={{ position: "relative", zIndex: 3 }}
           className={cn(
             "h-14 w-11 rounded-2xl border-2 border-hair bg-card text-center text-2xl font-semibold text-foreground",
             "focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30",
