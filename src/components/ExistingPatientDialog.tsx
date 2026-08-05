@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OtpInput } from "@/components/OtpInput";
+import { SafariOtpAutofill } from "@/components/SafariOtpAutofill";
 import { api } from "@/lib/api";
 import { maskPhone } from "@/lib/mask";
 import { usePatientAuth, PATIENT_TOKEN_KEY } from "@/state/patientAuthStore";
@@ -217,6 +218,7 @@ export function ExistingPatientDialog({ open, onOpenChange, phone }: ExistingPat
                   יש לך {rateLimit.remaining} מתוך {rateLimit.max} נסיונות לשעה
                 </p>
               )}
+              <SafariOtpAutofill onAutofill={(c) => { setCode(c); void verify(c); }} />
             </div>
           </>
         )}

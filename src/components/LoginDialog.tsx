@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OtpInput } from "@/components/OtpInput";
+import { SafariOtpAutofill } from "@/components/SafariOtpAutofill";
 import { api } from "@/lib/api";
 import { IL_PHONE_REGEX } from "@/lib/validation";
 import { maskPhone, maskEmail } from "@/lib/mask";
@@ -300,6 +301,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   יש לך {rateLimit.remaining} מתוך {rateLimit.max} נסיונות לשעה
                 </p>
               )}
+              <SafariOtpAutofill onAutofill={(c) => { setCode(c); void verify(c); }} />
             </div>
           </>
         )}

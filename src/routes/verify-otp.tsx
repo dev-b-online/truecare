@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PageShell } from "@/components/PageShell";
 import { OtpInput } from "@/components/OtpInput";
+import { SafariOtpAutofill } from "@/components/SafariOtpAutofill";
 import { Button } from "@/components/ui/button";
 import { useOnboarding } from "@/state/onboardingStore";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -166,6 +167,7 @@ function VerifyOtpRoute() {
             יש לך {rateLimit.remaining} מתוך {rateLimit.max} נסיונות לשעה
           </p>
         )}
+        <SafariOtpAutofill onAutofill={(c) => { setCode(c); void doVerify(c); }} />
       </div>
     </PageShell>
   );
