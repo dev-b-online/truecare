@@ -47,14 +47,19 @@ export function OtpInput({ value, onChange, length = 6, disabled }: OtpInputProp
     cellRefs.current[Math.min(text.length, length - 1)]?.focus();
   };
 
-  // Safari iOS: overlay input receives the full autofill value
+  // Safari iOS: overlay input receives the full autofill value.
+  // We use setTimeout(0) because Safari fires onInput before the full
+  // autofill string is committed to input.value — reading it synchronously
+  // drops the first character.
   const onOverlayInput = (e: FormEvent<HTMLInputElement>) => {
-    const text = (e.currentTarget.value ?? "").replace(/\D/g, "").slice(0, length);
-    if (!text) return;
-    onChange(text);
-    e.currentTarget.value = "";
-    // shift focus to last filled cell so the user can continue manually if needed
-    cellRefs.current[Math.min(text.length - 1, length - 1)]?.focus();
+    const el = e.currentTarget;
+    setTimeout(() => {
+      const text = (el.value ?? "").replace(/\D/g, "").slice(0, length);
+      if (!text) return;
+      onChange(text);
+      el.value = "";
+      cellRefs.current[Math.min(text.length - 1, length - 1)]?.focus();
+    }, 0);
   };
 
   return (
