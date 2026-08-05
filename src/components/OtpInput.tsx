@@ -4,14 +4,21 @@ import { cn } from "@/lib/utils";
 interface OtpInputProps {
   value: string;
   onChange: (v: string) => void;
-  onComplete?: (code: string) => void; // called immediately when 6 digits are ready (Safari autofill)
+  onComplete?: (code: string) => void;
   length?: number;
   disabled?: boolean;
 }
 
+/**
+ * OTP input component.
+ *
+ * Renders 6 visual digit cells for Android/desktop, plus a single
+ * visually-hidden <input autocomplete="one-time-code"> that Safari iOS
+ * uses for SMS autofill. The hidden input is real (not opacity:0 overlay)
+ * so Safari treats it as the canonical autofill target.
+ */
 export function OtpInput({ value, onChange, onComplete, length = 6, disabled }: OtpInputProps) {
   const cellRefs = useRef<Array<HTMLInputElement | null>>([]);
-  const overlayRef = useRef<HTMLInputElement | null>(null);
   const chars = value.padEnd(length, " ").slice(0, length).split("");
 
   const setAt = (i: number, ch: string) => {
@@ -34,54 +41,61 @@ export function OtpInput({ value, onChange, onComplete, length = 6, disabled }: 
     if (!text) return;
     e.preventDefault();
     onChange(text);
-    cellRefs.current[Math.min(text.length, length - 1)]?.focus();
+    if (text.length === length) onComplete?.(text);
+    else cellRefs.current[Math.min(text.length, length - 1)]?.focus();
   };
 
-  // Safari iOS autofill: the overlay input receives the full OTP string.
-  // We read it in onChange (not onInput) to get the complete value Safari committed.
-  const onOverlayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const text = e.target.value.replace(/\D/g, "").slice(0, length);
-    if (!text) return;
-
-    // update visual cells
-    onChange(text);
-
-    // reset overlay so Safari can autofill again if needed
-    e.target.value = "";
-
-    // if complete, trigger submit immediately — no need to press the button
-    if (text.length === length) {
-      onComplete?.(text);
-    } else {
-      cellRefs.current[Math.min(text.length - 1, length - 1)]?.focus();
-    }
+  // Safari iOS autofill target — visually hidden but real DOM input.
+  // Safari will fill this with the full OTP code from SMS.
+  // We use onInput with a short delay because Safari commits the value
+  // asynchronously across multiple input events.
+  const safariInputRef = useRef<HTMLInputElement | null>(null);
+  const onSafariInput = () => {
+    const el = safariInputRef.current;
+    if (!el) return;
+    // Use requestAnimationFrame to ensure Safari has committed the full value
+    requestAnimationFrame(() => {
+      const text = el.value.replace(/\D/g, "").slice(0, length);
+      if (text.length === 0) return;
+      el.value = "";
+      onChange(text);
+      if (text.length === length) {
+        onComplete?.(text);
+      } else {
+        cellRefs.current[Math.min(text.length - 1, length - 1)]?.focus();
+      }
+    });
   };
 
   return (
     <div dir="ltr" className="relative flex items-center justify-center gap-2">
-      {/* Overlay: single transparent input for Safari iOS SMS autofill */}
+      {/*
+        Safari iOS autofill input.
+        - position: absolute + clip hides it visually without opacity/pointer tricks
+        - font-size 16px prevents iOS zoom
+        - NOT autoFocus so it doesn't steal focus from cell inputs on load
+        - Safari still detects it and shows "From Messages" suggestion on tap
+      */}
       <input
-        ref={overlayRef}
+        ref={safariInputRef}
         type="text"
         inputMode="numeric"
         autoComplete="one-time-code"
-        autoFocus
-        onChange={onOverlayChange}
+        onInput={onSafariInput}
         disabled={disabled}
-        aria-label="קוד אימות"
+        aria-hidden="true"
+        tabIndex={-1}
         style={{
           position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          opacity: 0,
-          fontSize: 16,
-          zIndex: 10,
-          cursor: "text",
-          caretColor: "transparent",
-          background: "transparent",
-          border: "none",
-          outline: "none",
+          width: "1px",
+          height: "1px",
+          padding: 0,
+          margin: "-1px",
+          overflow: "hidden",
+          clip: "rect(0,0,0,0)",
+          whiteSpace: "nowrap",
+          border: 0,
+          fontSize: "16px",
         }}
       />
 
@@ -102,9 +116,8 @@ export function OtpInput({ value, onChange, onComplete, length = 6, disabled }: 
           }}
           inputMode="numeric"
           maxLength={1}
-          tabIndex={-1}
           className={cn(
-            "relative h-14 w-11 rounded-2xl border-2 border-hair bg-card text-center text-2xl font-semibold text-foreground",
+            "h-14 w-11 rounded-2xl border-2 border-hair bg-card text-center text-2xl font-semibold text-foreground",
             "focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30",
           )}
         />
