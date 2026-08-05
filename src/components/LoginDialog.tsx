@@ -161,9 +161,6 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
         // @ts-expect-error WebOTP not in TS types yet
         const otp = credential as { code: string };
         setCode(otp.code);
-        setTimeout(() => {
-          void verify(otp.code);
-        }, 600);
       })
       .catch(() => {
         // user cancelled or WebOTP not supported — ignore
@@ -270,7 +267,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col items-center gap-5">
-              <OtpInput value={code} onChange={setCode} onComplete={(c) => void verify(c)} disabled={busy} />
+              <OtpInput value={code} onChange={setCode} disabled={busy} />
               <Button
                 className="h-12 w-full rounded-full text-base"
                 disabled={code.length !== 6 || busy}
@@ -301,7 +298,7 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
                   יש לך {rateLimit.remaining} מתוך {rateLimit.max} נסיונות לשעה
                 </p>
               )}
-              <SafariOtpAutofill onAutofill={(c) => { setCode(c); void verify(c); }} />
+              <SafariOtpAutofill onAutofill={(c) => setCode(c)} />
             </div>
           </>
         )}

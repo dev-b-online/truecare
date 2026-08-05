@@ -116,9 +116,6 @@ function VerifyOtpRoute() {
         // @ts-expect-error WebOTP not in TS types yet
         const otp = credential as { code: string };
         setCode(otp.code);
-        setTimeout(() => {
-          void doVerify();
-        }, 600);
       })
       .catch(() => {
         // user cancelled or WebOTP not supported — ignore
@@ -145,12 +142,12 @@ function VerifyOtpRoute() {
           </span>
         </p>
         <div className="card-tint w-full rounded-2xl p-5">
-          <OtpInput value={code} onChange={setCode} onComplete={(c) => void doVerify(c)} disabled={submitting} />
+          <OtpInput value={code} onChange={setCode} disabled={submitting} />
         </div>
         <Button
           className="h-12 w-full rounded-full text-base"
           disabled={code.length !== 6 || submitting}
-          onClick={doVerify}
+          onClick={() => void doVerify()}
         >
           אמת ←
         </Button>
@@ -167,7 +164,7 @@ function VerifyOtpRoute() {
             יש לך {rateLimit.remaining} מתוך {rateLimit.max} נסיונות לשעה
           </p>
         )}
-        <SafariOtpAutofill onAutofill={(c) => { setCode(c); void doVerify(c); }} />
+        <SafariOtpAutofill onAutofill={(c) => setCode(c)} />
       </div>
     </PageShell>
   );

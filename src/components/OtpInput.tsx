@@ -4,12 +4,11 @@ import { cn } from "@/lib/utils";
 interface OtpInputProps {
   value: string;
   onChange: (v: string) => void;
-  onComplete?: (code: string) => void;
   length?: number;
   disabled?: boolean;
 }
 
-export function OtpInput({ value, onChange, onComplete, length = 6, disabled }: OtpInputProps) {
+export function OtpInput({ value, onChange, length = 6, disabled }: OtpInputProps) {
   const cellRefs = useRef<Array<HTMLInputElement | null>>([]);
   const chars = value.padEnd(length, " ").slice(0, length).split("");
 
@@ -33,8 +32,7 @@ export function OtpInput({ value, onChange, onComplete, length = 6, disabled }: 
     if (!text) return;
     e.preventDefault();
     onChange(text);
-    if (text.length === length) onComplete?.(text);
-    else cellRefs.current[Math.min(text.length, length - 1)]?.focus();
+    cellRefs.current[Math.min(text.length, length - 1)]?.focus();
   };
 
   return (
@@ -45,7 +43,7 @@ export function OtpInput({ value, onChange, onComplete, length = 6, disabled }: 
           ref={(el) => { cellRefs.current[i] = el; }}
           value={chars[i].trim()}
           disabled={disabled}
-          autoComplete="off"
+          autoComplete="one-time-code"
           onPaste={onCellPaste}
           onKeyDown={(e) => onCellKey(e, i)}
           onChange={(e) => {

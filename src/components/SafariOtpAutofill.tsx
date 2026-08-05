@@ -7,8 +7,7 @@ interface SafariOtpAutofillProps {
 
 /**
  * Invisible input for Safari iOS SMS autofill.
- * Place this anywhere on the page (preferably after the button) —
- * Safari finds it via autocomplete="one-time-code" and fills it automatically.
+ * Fills the code into state — user still taps the button manually.
  */
 export function SafariOtpAutofill({ onAutofill, length = 6 }: SafariOtpAutofillProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -16,17 +15,14 @@ export function SafariOtpAutofill({ onAutofill, length = 6 }: SafariOtpAutofillP
   useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
-
-    const handleChange = () => {
+    const handleInput = () => {
       const text = el.value.replace(/\D/g, "").slice(0, length);
-      if (text.length === length) {
-        el.value = "";
-        onAutofill(text);
-      }
+      if (!text) return;
+      el.value = "";
+      onAutofill(text);
     };
-
-    el.addEventListener("input", handleChange);
-    return () => el.removeEventListener("input", handleChange);
+    el.addEventListener("input", handleInput);
+    return () => el.removeEventListener("input", handleInput);
   }, [onAutofill, length]);
 
   return (
